@@ -1,0 +1,1964 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"/>
+<meta name="theme-color" content="#166534"/>
+<title>Dessie Mart - Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script crossorigin src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7/babel.min.js"></script>
+<style>
+
+/* ===== DESIGN TOKENS ===== */
+:root {
+  --font-display: 'Poppins', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --bg-primary: #ffffff; --bg-secondary: #f8fafc; --bg-tertiary: #f1f5f9; --bg-elevated: #ffffff;
+  --bg-header: linear-gradient(135deg, #14532d 0%, #166534 50%, #15803d 100%);
+  --text-primary: #0f172a; --text-secondary: #475569; --text-tertiary: #94a3b8; --text-inverse: #ffffff;
+  --brand-green: #166534; --brand-green-dark: #14532d; --brand-green-light: #dcfce7; --brand-green-soft: #f0fdf4;
+  --brand-gold: #f59e0b; --brand-gold-dark: #d97706; --brand-gold-light: #fef3c7;
+  --danger: #dc2626; --danger-soft: #fee2e2; --success: #16a34a; --success-soft: #dcfce7;
+  --warning: #ca8a04; --warning-soft: #fef9c3; --info: #2563eb; --info-soft: #dbeafe;
+  --border: #e2e8f0; --border-light: #f1f5f9;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --radius-sm: 8px; --radius: 12px; --radius-lg: 16px; --radius-xl: 24px; --radius-full: 9999px;
+  --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+[data-theme="dark"] {
+  --bg-primary: #0f172a; --bg-secondary: #1e293b; --bg-tertiary: #334155; --bg-elevated: #1e293b;
+  --bg-header: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
+  --text-primary: #f8fafc; --text-secondary: #cbd5e1; --text-tertiary: #64748b; --text-inverse: #0f172a;
+  --brand-green: #22c55e; --brand-green-dark: #16a34a; --brand-green-light: #14532d; --brand-green-soft: #064e3b;
+  --brand-gold: #fbbf24; --brand-gold-dark: #f59e0b; --brand-gold-light: #451a03;
+  --border: #334155; --border-light: #1e293b;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
+body { font-family: var(--font-body); background: var(--bg-primary); color: var(--text-primary); line-height: 1.5; min-height: 100vh; overflow-x: hidden; }
+h1,h2,h3,h4,.font-display { font-family: var(--font-display); }
+::selection { background: var(--brand-gold); color: var(--brand-green-dark); }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeInScale { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(-20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+.animate-fadeIn { animation: fadeIn 0.4s var(--transition) forwards; }
+.animate-slideUp { animation: slideUp 0.5s var(--transition) forwards; }
+.animate-fadeInScale { animation: fadeInScale 0.3s var(--transition) forwards; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+.scrollhide::-webkit-scrollbar { display: none; }
+.glass { background: rgba(255,255,255,0.08); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+.skeleton { background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: var(--radius-sm); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: var(--font-display); font-weight: 600; font-size: 14px; padding: 12px 20px; border-radius: var(--radius); border: none; cursor: pointer; transition: all var(--transition); min-height: 48px; position: relative; overflow: hidden; }
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+.btn-primary { background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%); color: white; box-shadow: 0 4px 14px rgba(22, 101, 52, 0.3); }
+.btn-primary:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(22, 101, 52, 0.4); transform: translateY(-1px); }
+.btn-gold { background: linear-gradient(135deg, var(--brand-gold) 0%, var(--brand-gold-dark) 100%); color: var(--brand-green-dark); box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3); }
+.btn-gold:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4); transform: translateY(-1px); }
+.btn-secondary { background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border); }
+.btn-secondary:hover:not(:disabled) { background: var(--bg-tertiary); }
+.btn-danger { background: var(--danger); color: white; }
+.btn-danger:hover:not(:disabled) { background: #b91c1c; }
+.btn-ghost { background: transparent; color: var(--text-secondary); }
+.btn-ghost:hover:not(:disabled) { background: var(--bg-secondary); color: var(--text-primary); }
+.btn-sm { padding: 8px 14px; font-size: 12px; min-height: 36px; }
+.btn-lg { padding: 16px 28px; font-size: 16px; min-height: 56px; }
+.card { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; transition: all var(--transition); }
+.card-hover:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--brand-green); }
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: var(--radius-full); white-space: nowrap; }
+.badge-green { background: var(--brand-green-soft); color: var(--brand-green); }
+.badge-gold { background: var(--brand-gold-light); color: var(--brand-gold-dark); }
+.badge-red { background: var(--danger-soft); color: var(--danger); }
+.badge-blue { background: var(--info-soft); color: var(--info); }
+.badge-gray { background: var(--bg-tertiary); color: var(--text-secondary); }
+.input { width: 100%; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: var(--radius); background: var(--bg-primary); color: var(--text-primary); font-family: var(--font-body); font-size: 14px; transition: all var(--transition); min-height: 48px; }
+.input:focus { outline: none; border-color: var(--brand-green); box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.1); }
+.input::placeholder { color: var(--text-tertiary); }
+textarea.input { min-height: 100px; resize: vertical; }
+select.input { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 40px; }
+.toast-container { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast { background: var(--brand-green); color: white; padding: 12px 20px; border-radius: var(--radius); font-weight: 600; font-size: 14px; box-shadow: var(--shadow-xl); animation: toastIn 0.3s var(--transition); pointer-events: auto; display: flex; align-items: center; gap: 8px; }
+.toast.error { background: var(--danger); }
+.toast.warning { background: var(--warning); color: var(--text-primary); }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 16px; animation: fadeIn 0.2s ease; }
+.modal-content { background: var(--bg-elevated); border-radius: var(--radius-xl); max-width: 480px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-xl); animation: fadeInScale 0.3s ease; border: 1px solid var(--border); }
+.timeline { position: relative; padding-left: 28px; }
+.timeline::before { content: ''; position: absolute; left: 8px; top: 4px; bottom: 4px; width: 2px; background: var(--border); border-radius: var(--radius-full); }
+.timeline-item { position: relative; padding-bottom: 20px; }
+.timeline-item::before { content: ''; position: absolute; left: -24px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--border); border: 2px solid var(--bg-primary); }
+.timeline-item.active::before { background: var(--brand-green); box-shadow: 0 0 0 4px var(--brand-green-light); }
+.timeline-item.completed::before { background: var(--brand-gold); }
+.timeline-item.rejected::before { background: var(--danger); }
+.step-bar { display: flex; align-items: center; gap: 4px; margin-bottom: 24px; }
+.step-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; border: 2px solid var(--border); color: var(--text-tertiary); background: var(--bg-primary); transition: all var(--transition); }
+.step-dot.active { background: var(--brand-green); border-color: var(--brand-green); color: white; }
+.step-dot.done { background: var(--brand-green-soft); border-color: var(--brand-green); color: var(--brand-green); }
+.step-line { flex: 1; height: 2px; background: var(--border); border-radius: var(--radius-full); max-width: 40px; transition: all var(--transition); }
+.step-line.done { background: var(--brand-green); }
+.product-card { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: all var(--transition); cursor: pointer; display: flex; flex-direction: column; }
+.product-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--brand-green); }
+.product-card .image-wrap { position: relative; height: 160px; overflow: hidden; background: var(--bg-secondary); }
+.product-card .image-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+.product-card:hover .image-wrap img { transform: scale(1.05); }
+.product-card .content { padding: 14px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.product-card .price { font-family: var(--font-display); font-weight: 800; font-size: 16px; color: var(--brand-gold-dark); }
+.category-card { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; display: flex; align-items: center; gap: 14px; transition: all var(--transition); cursor: pointer; }
+.category-card:hover { background: var(--brand-green-soft); border-color: var(--brand-green); transform: translateX(4px); }
+.category-card .icon-box { width: 48px; height: 48px; border-radius: var(--radius); background: var(--brand-green-soft); color: var(--brand-green); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.order-card { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; transition: all var(--transition); }
+.order-card:hover { border-color: var(--brand-green); box-shadow: var(--shadow-md); }
+.stat-card { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; gap: 8px; }
+.stat-card .value { font-family: var(--font-display); font-size: 28px; font-weight: 800; color: var(--brand-green); }
+.stat-card .label { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+.otp-display { font-family: 'Courier New', monospace; font-size: 24px; font-weight: 700; letter-spacing: 4px; padding: 16px 24px; background: var(--brand-green-soft); color: var(--brand-green); border-radius: var(--radius); border: 2px dashed var(--brand-green); text-align: center; user-select: all; }
+.photo-upload { border: 2px dashed var(--border); border-radius: var(--radius-lg); padding: 24px; text-align: center; cursor: pointer; transition: all var(--transition); background: var(--bg-secondary); }
+.photo-upload:hover { border-color: var(--brand-green); background: var(--brand-green-soft); }
+.photo-upload.has-image { border-style: solid; border-color: var(--brand-green); }
+.market-divider { height: 6px; background: repeating-linear-gradient(115deg, var(--brand-gold) 0 10px, var(--brand-green) 10px 20px); clip-path: polygon(0 0,100% 0,100% 50%,95% 100%,90% 50%,85% 100%,80% 50%,75% 100%,70% 50%,65% 100%,60% 50%,55% 100%,50% 50%,45% 100%,40% 50%,35% 100%,30% 50%,25% 100%,20% 50%,15% 100%,10% 50%,5% 100%,0 50%); }
+.spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--brand-green); border-radius: 50%; animation: spin 0.8s linear infinite; }
+.tab-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.tab-btn { padding: 10px 18px; border-radius: var(--radius-full); border: 1px solid var(--border); background: var(--bg-primary); color: var(--text-secondary); font-weight: 600; font-size: 13px; white-space: nowrap; cursor: pointer; transition: all var(--transition); min-height: 40px; }
+.tab-btn.active { background: var(--brand-green); color: white; border-color: var(--brand-green); box-shadow: 0 4px 12px rgba(22, 101, 52, 0.25); }
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-tertiary); }
+.empty-state .icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+.chat-bubble { max-width: 80%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.4; word-break: break-word; }
+.chat-bubble.owner { align-self: flex-start; background: var(--bg-tertiary); color: var(--text-primary); border-bottom-left-radius: 4px; }
+.chat-bubble.customer { align-self: flex-end; background: var(--brand-green); color: white; border-bottom-right-radius: 4px; }
+.map-link { display: inline-flex; align-items: center; gap: 6px; color: var(--brand-green); font-weight: 600; font-size: 13px; text-decoration: none; padding: 8px 12px; background: var(--brand-green-soft); border-radius: var(--radius); transition: all var(--transition); }
+.map-link:hover { background: var(--brand-green); color: white; }
+.toggle-switch { width: 48px; height: 26px; border-radius: 13px; background: var(--bg-tertiary); position: relative; cursor: pointer; transition: background var(--transition); border: none; }
+.toggle-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: white; box-shadow: var(--shadow); transition: transform var(--transition); }
+.toggle-switch.active { background: var(--brand-green); }
+.toggle-switch.active::after { transform: translateX(22px); }
+.progress-bar { height: 6px; background: var(--bg-tertiary); border-radius: var(--radius-full); overflow: hidden; }
+.progress-bar .fill { height: 100%; background: linear-gradient(90deg, var(--brand-green), var(--brand-gold)); border-radius: var(--radius-full); transition: width 0.5s ease; }
+.app-header { background: var(--bg-header); color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-elevated); border-top: 1px solid var(--border); box-shadow: 0 -4px 20px rgba(0,0,0,0.05); z-index: 100; padding-bottom: env(safe-area-inset-bottom, 12px); }
+.bottom-nav button { flex: 1; background: none; border: none; padding: 10px 4px; display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--text-tertiary); font-size: 11px; font-weight: 500; cursor: pointer; transition: all var(--transition); min-height: 56px; }
+.bottom-nav button.active { color: var(--brand-green); }
+.bottom-nav button .nav-icon { font-size: 22px; transition: transform var(--transition); }
+.bottom-nav button.active .nav-icon { transform: translateY(-2px); }
+@media (min-width: 768px) { .grid-cols-2 { grid-template-columns: repeat(2, 1fr); } .grid-cols-3 { grid-template-columns: repeat(3, 1fr); } .grid-cols-4 { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 1024px) { .admin-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; } .admin-sidebar { position: sticky; top: 0; height: 100vh; overflow-y: auto; } }
+.grid { display: grid; gap: 12px; }
+.long-list > * { content-visibility: auto; contain-intrinsic-size: 0 200px; }
+.flex { display: flex; } .flex-col { flex-direction: column; } .items-center { align-items: center; } .justify-between { justify-content: space-between; } .justify-center { justify-content: center; }
+.gap-1 { gap: 4px; } .gap-2 { gap: 8px; } .gap-3 { gap: 12px; } .gap-4 { gap: 16px; }
+.p-3 { padding: 12px; } .p-4 { padding: 16px; } .p-5 { padding: 20px; }
+.mb-2 { margin-bottom: 8px; } .mb-3 { margin-bottom: 12px; } .mb-4 { margin-bottom: 16px; }
+.mt-2 { margin-top: 8px; } .mt-3 { margin-top: 12px; } .mt-4 { margin-top: 16px; }
+.text-sm { font-size: 13px; } .text-lg { font-size: 16px; } .text-xl { font-size: 20px; } .text-2xl { font-size: 24px; }
+.font-bold { font-weight: 700; } .font-semibold { font-weight: 600; } .font-medium { font-weight: 500; }
+.text-secondary { color: var(--text-secondary); } .text-tertiary { color: var(--text-tertiary); }
+.w-full { width: 100%; } .h-full { height: 100%; }
+.overflow-hidden { overflow: hidden; } .overflow-auto { overflow: auto; }
+.relative { position: relative; } .absolute { position: absolute; }
+.sticky { position: sticky; } .top-0 { top: 0; }
+.z-10 { z-index: 10; } .z-50 { z-index: 50; }
+.rounded-lg { border-radius: var(--radius-lg); } .rounded-full { border-radius: var(--radius-full); }
+.shadow-sm { box-shadow: var(--shadow-sm); } .shadow { box-shadow: var(--shadow); } .shadow-md { box-shadow: var(--shadow-md); }
+.border { border: 1px solid var(--border); }
+.bg-primary { background: var(--bg-primary); } .bg-secondary { background: var(--bg-secondary); } .bg-tertiary { background: var(--bg-tertiary); }
+.text-primary { color: var(--text-primary); } .text-inverse { color: var(--text-inverse); }
+.whitespace-nowrap { white-space: nowrap; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-1 { flex: 1; }
+.hidden { display: none; }
+@media (min-width: 768px) { .md\:flex { display: flex; } .md\:grid { display: grid; } .md\:hidden { display: none; } }
+
+/* ===== NEW: SELLER GROUP STYLES ===== */
+.seller-group { background: var(--bg-secondary); border: 1.5px solid var(--border); border-radius: var(--radius-lg); padding: 14px; margin-bottom: 12px; }
+.seller-group-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed var(--border); }
+.seller-group-products { display: flex; flex-direction: column; gap: 6px; }
+.seller-group-product { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 6px 8px; background: var(--bg-primary); border-radius: var(--radius-sm); }
+.seller-group-fee { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 13px; font-weight: 600; }
+.pickup-badge { display: inline-flex; align-items: center; gap: 4px; background: var(--info-soft); color: var(--info); font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: var(--radius-full); }
+.payment-pending { background: var(--warning-soft); color: var(--warning); border: 1.5px dashed var(--warning); }
+.payment-verified { background: var(--success-soft); color: var(--success); border: 1.5px solid var(--success); }
+
+</style>
+</head>
+<body>
+<script>
+window.onerror = function(e,s,l,c) {
+  document.body.innerHTML = '<div style="padding:40px;color:#DC2626;font-family:monospace;white-space:pre-wrap;font-size:14px;line-height:1.6"><h2 style="margin:0 0 12px">Runtime Error</h2>' + e + '<br>Line: ' + l + ', Col: ' + c + '</div>';
+};
+</script>
+<div id="root"></div>
+
+<!-- Shared code -->
+<script type="text/babel" data-presets="react" src="shared.js"></script>
+
+<!-- Admin App -->
+<script type="text/babel" data-presets="react">
+function AdminApp() {
+  const [theme, setThemeState] = useState(getTheme());
+  const [adminToken, setAdminTokenState] = useState(() => { try { return localStorage.getItem('dm_adminToken') || null; } catch { return null; } });
+  const [adminRole, setAdminRoleState] = useState(() => { try { return localStorage.getItem('dm_adminRole') || null; } catch { return null; } });
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [settings, setSettings] = useState({ mediumSurcharge: DEFAULT_MEDIUM_SURCHARGE, heavySurcharge: DEFAULT_HEAVY_SURCHARGE });
+  const [deliveryZones, setDeliveryZones] = useState(DEFAULT_DELIVERY_ZONES);
+  const [admins, setAdmins] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [tickets, setTickets] = useState([]);
+  const [lastRefresh, setLastRefresh] = useState(Date.now());
+  const [loading, setLoading] = useState(true);
+  const showToast = useToast();
+
+  const setAdminToken = useCallback((token) => {
+    setAdminTokenState(token);
+    try { if (token) localStorage.setItem('dm_adminToken', token); else localStorage.removeItem('dm_adminToken'); } catch(e) {}
+  }, []);
+  const setAdminRole = useCallback((role) => {
+    setAdminRoleState(role);
+    try { if (role) localStorage.setItem('dm_adminRole', role); else localStorage.removeItem('dm_adminRole'); } catch(e) {}
+  }, []);
+
+  // Data refresh functions - memoized to avoid recreation
+  const refreshProducts = useCallback(async () => {
+    try {
+      const p = await apiGet("getProducts", adminToken ? { token: adminToken } : {});
+      setProducts(Array.isArray(p) ? p : []);
+    } catch(e) {}
+  }, [adminToken]);
+
+  const refreshCategories = useCallback(async () => {
+    try {
+      const cats = await apiGet("getCategories");
+      setCategories(Array.isArray(cats) ? cats : []);
+    } catch(e) {}
+  }, []);
+
+  const refreshSettings = useCallback(async () => {
+    try {
+      const s = await apiGet("getSettings");
+      const m = {}; (Array.isArray(s) ? s : []).forEach(r => { m[r.key] = r.value; });
+      setSettings({
+        mediumSurcharge: Number(m.mediumSurcharge) || DEFAULT_MEDIUM_SURCHARGE,
+        heavySurcharge: Number(m.heavySurcharge) || DEFAULT_HEAVY_SURCHARGE,
+        paymentMethods: safeParse(m.paymentMethods)
+      });
+    } catch(e) {}
+  }, []);
+
+  const refreshDeliveryZones = useCallback(async () => {
+    try {
+      const z = await apiGet("getDeliveryZones");
+      setDeliveryZones(Array.isArray(z) && z.length > 0 ? z : DEFAULT_DELIVERY_ZONES);
+    } catch(e) { setDeliveryZones(DEFAULT_DELIVERY_ZONES); }
+  }, []);
+
+  const refreshAdmins = useCallback(async () => {
+    try { const a = await apiGet("getAdmins"); setAdmins(Array.isArray(a) ? a : []); } catch(e) {}
+  }, []);
+
+  const refreshOrders = useCallback(async () => {
+    if (!adminToken) return;
+    try {
+      const a = await apiGet("getOrders", { token: adminToken });
+      const l = (Array.isArray(a) ? a : []).map(o => ({ ...o, items: safeParse(o.itemsJson) }));
+      setOrders(l.reverse());
+      setLastRefresh(Date.now());
+    } catch(e) {}
+  }, [adminToken]);
+
+  const refreshTickets = useCallback(async () => {
+    if (!adminToken) return;
+    try { const a = await apiGet("getTickets"); setTickets((Array.isArray(a) ? a : []).reverse()); } catch(e) {}
+  }, [adminToken]);
+
+  // FIX: Switched to Promise.allSettled so one slow sheet doesn't block the entire app
+  useEffect(() => {
+    Promise.allSettled([refreshProducts(), refreshCategories(), refreshSettings(), refreshDeliveryZones()])
+      .then(() => setLoading(false))
+      .catch(() => setLoading(false));
+  }, []);
+
+  // FIX: Reduced polling from 8s to 15s to cut background API load
+  useEffect(() => {
+    if (!adminToken) return;
+    refreshOrders();
+    refreshTickets();
+    refreshAdmins();
+    const iv = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        refreshOrders();
+        refreshTickets();
+      }
+    }, 15000);
+    return () => clearInterval(iv);
+  }, [adminToken]);
+
+  const logoutAdmin = useCallback(() => {
+    setAdminToken(null);
+    setAdminRole(null);
+  }, [setAdminToken, setAdminRole]);
+
+  const nav = useMemo(() => ({
+    home: () => { window.location.href = "index.html"; }
+  }), []);
+
+  if (loading) return (
+    <div style={{ padding: 80, textAlign: "center" }}>
+      <div className="spinner" style={{ width: 40, height: 40, margin: "0 auto 20px", borderWidth: 3 }} />
+      <div style={{ color: "var(--text-secondary)", fontWeight: 600 }}>Loading...</div>
+    </div>
+  );
+
+  return (
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      <AdminHeader 
+        logoutAdmin={logoutAdmin} 
+        nav={nav}
+      />
+      <div className="market-divider" />
+
+      <main style={{ flex: 1, maxWidth: 900, margin: "0 auto", padding: "0 16px 40px", width: "100%" }}>
+        <AdminView 
+          nav={nav} 
+          products={products} 
+          refreshProducts={refreshProducts} 
+          categories={categories} 
+          refreshCategories={refreshCategories}
+          showToast={showToast} 
+          settings={settings} 
+          refreshSettings={refreshSettings} 
+          adminToken={adminToken} 
+          setAdminToken={setAdminToken}
+          adminRole={adminRole} 
+          setAdminRole={setAdminRole} 
+          logoutAdmin={logoutAdmin} 
+          t={(k) => (TRANSLATIONS['en'] && TRANSLATIONS['en'][k]) || TRANSLATIONS['en'][k] || k} 
+          deliveryZones={deliveryZones}
+          refreshDeliveryZones={refreshDeliveryZones} 
+          orders={orders} 
+          refreshOrders={refreshOrders} 
+          tickets={tickets}
+          refreshTickets={refreshTickets} 
+          admins={admins} 
+          refreshAdmins={refreshAdmins} 
+          lastRefresh={lastRefresh} 
+        />
+      </main>
+    </div>
+  );
+}
+
+// ===== ADMIN HEADER =====
+const AdminHeader = memo(({ logoutAdmin, nav }) => {
+  return (
+    <header className="app-header">
+      <div style={{ maxWidth: 900, margin: "0 auto", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <button onClick={nav.home} style={{ background: "none", border: "none", padding: 0, display: "flex", cursor: "pointer" }}>
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: "linear-gradient(135deg, #fbbf24, #f59e0b)", display: "flex", alignItems: "center", justifyContent: "center", color: "#14532d", fontWeight: 800, fontSize: 20, fontFamily: "var(--font-display)", boxShadow: "0 2px 8px rgba(245,158,11,0.4)" }}>D</div>
+          </button>
+          <span className="font-display" style={{ fontWeight: 700, fontSize: 22, letterSpacing: "-0.5px", color: "#fff" }}>Dessie Mart Admin</span>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <button onClick={logoutAdmin} className="btn btn-sm" style={{ background: "rgba(255,255,255,0.12)", color: "#fff", border: "none", borderRadius: 10, padding: "8px 12px", minHeight: 36, fontSize: 12, fontWeight: 600 }}>
+            <Icon name="LogOut" size={13} /> Logout
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+});
+
+// ===== ADMIN VIEW =====
+const AdminView = memo(({ nav, products, refreshProducts, categories, refreshCategories, showToast, settings, refreshSettings, adminToken, setAdminToken, adminRole, setAdminRole, logoutAdmin, t, deliveryZones, refreshDeliveryZones, orders, refreshOrders, tickets, refreshTickets, admins, refreshAdmins, lastRefresh }) => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loggingIn, setLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState("");
+  const [tab, setTab] = useState("orders");
+  const [isLoggedIn, setIsLoggedIn] = useState(!!adminToken);
+
+  // Create stable productMap reference - FIX: avoid recreating on every render
+  const productMap = useMemo(() => {
+    const map = {};
+    products.forEach(p => { map[p.id] = p; });
+    return map;
+  }, [products]);
+
+  useEffect(() => { if (adminToken) { setIsLoggedIn(true); refreshOrders(); refreshTickets(); refreshAdmins(); } else setIsLoggedIn(false); }, [adminToken]);
+
+  async function tryLogin() {
+    if (!username.trim() || !password.trim() || loggingIn) return;
+    setLoginError(""); setLoggingIn(true);
+    try {
+      const r = await apiPost("adminLogin", { username: username.trim(), password: password.trim() });
+      if (r && r.success) { setAdminToken(r.adminId); setAdminRole(r.role); setIsLoggedIn(true); showToast(`Logged in as ${r.role}`); }
+      else setLoginError("Invalid username or password.");
+    } catch(e) { setLoginError("Couldn't reach the server."); }
+    setLoggingIn(false);
+  }
+
+  if (!isLoggedIn) return (
+    <div style={{ padding: 16, maxWidth: 420, margin: "0 auto" }} className="animate-fadeIn">
+      <BackBar onBack={nav.home} title={t("adminLogin")} />
+      <div className="card" style={{ marginTop: 24 }}>
+        <div style={{ textAlign: "center", marginBottom: 24 }}>
+          <div style={{ width: 64, height: 64, borderRadius: 16, background: "var(--brand-green-soft)", color: "var(--brand-green)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: 28 }}><Icon name="Lock" size={28} /></div>
+          <h2 className="font-display" style={{ fontSize: 22, fontWeight: 800, marginBottom: 4 }}>{t("adminLogin")}</h2>
+          <p style={{ color: "var(--text-secondary)", fontSize: 13 }}>Access your dashboard</p>
+        </div>
+        <label className="text-sm font-semibold text-secondary" style={{ display: "block", marginBottom: 6 }}>{t("username")}</label>
+        <input type="text" value={username} onChange={e => setUsername(e.target.value)} className="input" style={{ marginBottom: 14 }} />
+        <label className="text-sm font-semibold text-secondary" style={{ display: "block", marginBottom: 6 }}>{t("password")}</label>
+        <input type="password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === "Enter" && tryLogin()} className="input" style={{ marginBottom: 16 }} />
+        {loginError && <div style={{ color: "var(--danger)", fontSize: 13, marginBottom: 14, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}><Icon name="AlertTriangle" size={14} />{loginError}</div>}
+        <button onClick={tryLogin} disabled={loggingIn || !username.trim() || !password.trim()} className="btn btn-primary btn-lg" style={{ width: "100%" }}>
+          {loggingIn ? <><span className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} /> Logging in…</> : <><Icon name="Lock" size={16} /> {t("login")}</>}
+        </button>
+      </div>
+    </div>
+  );
+
+  if (adminRole === "delivery") return <DeliveryDashboard nav={nav} orders={orders} refreshOrders={refreshOrders} showToast={showToast} t={t} adminToken={adminToken} admins={admins} productMap={productMap} />;
+  if (adminRole === "seller") return <SellerDashboard nav={nav} orders={orders} refreshOrders={refreshOrders} showToast={showToast} t={t} adminToken={adminToken} productMap={productMap} />;
+
+  const tabs = [
+    ["orders", "Orders", "ClipboardList"], ["products", "Products", "Package"],
+    ["categories", "Categories", "Home"], ["tickets", "Support", "LifeBuoy"],
+    ["analytics", "Analytics", "BarChart3"], ["settings", "Settings", "Settings"],
+    ["admins", "Admins", "Shield"], ["zones", "Zones", "MapPin"]
+  ];
+
+  return (
+    <div className="animate-fadeIn">
+      <div style={{ padding: 16 }}>
+        <BackBar onBack={nav.home} title={t("ownerDashboard")} />
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8, marginBottom: 4 }}>
+          <span style={{ fontSize: 12, color: "var(--text-tertiary)" }}>Last updated: {timeAgo(new Date(lastRefresh).toISOString())}</span>
+          <button onClick={() => { refreshOrders(); refreshTickets(); refreshAdmins(); showToast("Refreshed"); }} className="btn btn-ghost btn-sm" style={{ padding: "4px 8px", minHeight: 28 }}>
+            <Icon name="RefreshCw" size={12} />
+          </button>
+        </div>
+        <div className="tab-bar scrollhide" style={{ marginTop: 12 }}>
+          {tabs.map(([id, label, icon]) => (
+            <button key={id} onClick={() => setTab(id)} className={`tab-btn ${tab === id ? "active" : ""}`}>
+              <Icon name={icon} size={13} /> {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ padding: "0 16px 40px" }}>
+        {tab === "orders" && <OwnerOrders orders={orders} refreshOrders={refreshOrders} showToast={showToast} t={t} admins={admins} adminToken={adminToken} productMap={productMap} />}
+        {tab === "products" && <OwnerProducts products={products} refreshProducts={refreshProducts} categories={categories} admins={admins} showToast={showToast} t={t} />}
+        {tab === "categories" && <OwnerCategories categories={categories} refreshCategories={refreshCategories} showToast={showToast} t={t} />}
+        {tab === "tickets" && <OwnerTickets tickets={tickets} refreshTickets={refreshTickets} showToast={showToast} t={t} />}
+        {tab === "analytics" && <OwnerAnalytics orders={orders} products={products} t={t} productMap={productMap} />}
+        {tab === "settings" && <OwnerSettings settings={settings} refreshSettings={refreshSettings} showToast={showToast} t={t} />}
+        {tab === "admins" && <OwnerAdmins admins={admins} refreshAdmins={refreshAdmins} showToast={showToast} t={t} categories={categories} products={products} refreshProducts={refreshProducts} />}
+        {tab === "zones" && <OwnerZones deliveryZones={deliveryZones} refreshDeliveryZones={refreshDeliveryZones} showToast={showToast} t={t} />}
+      </div>
+    </div>
+  );
+});
+
+// ===== SELLER DASHBOARD =====
+const SellerDashboard = memo(({ nav, orders, refreshOrders, showToast, t, adminToken, productMap }) => {
+  const [tab, setTab] = useState("pending");
+  const [handoverOTP, setHandoverOTP] = useState({});
+
+  // FIX: Memoized filtering to avoid recalculation on every render
+  const { pending, accepted, history } = useMemo(() => {
+    const p = orders.filter(o => o.orderStatus === "Pending Seller Approval");
+    const a = orders.filter(o => o.orderStatus === "Accepted by Seller" || o.orderStatus === "Driver Assigned");
+    const h = orders.filter(o => ["Ready for Pickup", "Out for Delivery", "Delivered", "Rejected"].includes(o.orderStatus));
+    return { pending: p, accepted: a, history: h };
+  }, [orders]);
+
+  const handleAccept = useCallback(async (id) => {
+    try { await apiPost("sellerAcceptOrder", { orderId: id, token: adminToken }); refreshOrders(); showToast("Order accepted"); }
+    catch(e) { showToast("Failed to accept", "error"); }
+  }, [adminToken, refreshOrders, showToast]);
+
+  const handleReject = useCallback(async (id) => {
+    try { await apiPost("sellerRejectOrder", { orderId: id, token: adminToken }); refreshOrders(); showToast("Order rejected"); }
+    catch(e) { showToast("Failed to reject", "error"); }
+  }, [adminToken, refreshOrders, showToast]);
+
+  const handleGive = useCallback(async (id) => {
+    const otp = handoverOTP[id];
+    if (!otp || !otp.trim()) { showToast("Enter the OTP from the delivery driver", "warning"); return; }
+    try { 
+      await apiPost("sellerGiveToDelivery", { orderId: id, token: adminToken, otp }); 
+      refreshOrders(); 
+      showToast("Handed to delivery — moved to history"); 
+      setHandoverOTP(prev => ({ ...prev, [id]: "" }));
+    }
+    catch(e) { showToast("Failed: " + (e.message || "Invalid OTP"), "error"); }
+  }, [adminToken, refreshOrders, showToast, handoverOTP]);
+
+  return (
+    <div style={{ padding: 16 }} className="animate-fadeIn">
+      <BackBar onBack={nav.home} title={t("sellerDashboard")} />
+      <div className="tab-bar scrollhide" style={{ marginTop: 12 }}>
+        {[["pending","Pending"],["accepted","Accepted"],["history","History"]].map(([s,label]) => (
+          <button key={s} onClick={() => setTab(s)} className={`tab-btn ${tab===s?"active":""}`}>{label}</button>
+        ))}
+      </div>
+      {tab === "pending" && <OrderList orders={pending} empty={t("noPendingOrders")} actions={[
+        { label: t("accept"), handler: handleAccept, style: { background: "var(--success)", color: "white" } },
+        { label: t("reject"), handler: handleReject, style: { background: "var(--danger)", color: "white" } }
+      ]} t={t} showOTP={false} productMap={productMap} />}
+      {tab === "accepted" && <OrderList orders={accepted} empty="No accepted orders." actions={[
+        { label: t("handToDelivery"), handler: handleGive, style: { background: "var(--brand-gold)", color: "var(--brand-green-dark)" }, otpInput: true, otpState: handoverOTP, setOtp: setHandoverOTP }
+      ]} t={t} showOTP={true} productMap={productMap} />}
+      {tab === "history" && <OrderList orders={history} empty={t("noHistory")} t={t} showOTP={false} productMap={productMap} />}
+    </div>
+  );
+});
+
+// ===== DELIVERY DASHBOARD =====
+const DeliveryDashboard = memo(({ nav, orders, refreshOrders, showToast, t, adminToken, admins, productMap }) => {
+  const [tab, setTab] = useState("available");
+
+  const currentAdmin = useMemo(() => admins.find(a => a.AdminID === adminToken), [admins, adminToken]);
+  const currentDeliveryName = currentAdmin ? currentAdmin.Name : "";
+
+  // FIX: Memoized filtering
+  const { available, active, history } = useMemo(() => {
+    const av = orders.filter(o => o.orderStatus === "Accepted by Seller" && (!o.deliveryName || String(o.deliveryName).trim() === ""));
+    const ac = orders.filter(o => ["Driver Assigned", "Ready for Pickup", "Out for Delivery"].includes(o.orderStatus) && o.deliveryName === currentDeliveryName);
+    const hi = orders.filter(o => ["Delivered", "Rejected"].includes(o.orderStatus) && o.deliveryName === currentDeliveryName);
+    return { available: av, active: ac, history: hi };
+  }, [orders, currentDeliveryName]);
+
+  const handleClaim = useCallback(async (id) => {
+    try { await apiPost("deliveryClaimOrder", { orderId: id, token: adminToken }); refreshOrders(); showToast("Order claimed"); }
+    catch(e) { showToast("Failed to claim: " + (e.message || ""), "error"); }
+  }, [adminToken, refreshOrders, showToast]);
+
+  const handlePickup = useCallback(async (id) => {
+    try { await apiPost("deliveryPickupSub", { orderId: id, token: adminToken }); refreshOrders(); showToast("Marked as picked up / out for delivery"); }
+    catch(e) { showToast("Failed", "error"); }
+  }, [adminToken, refreshOrders, showToast]);
+
+  const handleDeliver = useCallback(async (id, otp, proofUrl) => {
+    try { await apiPost("deliveryDeliver", { orderId: id, token: adminToken, otp, proofUrl }); refreshOrders(); showToast("Order delivered!"); }
+    catch(e) { showToast("Failed to deliver: " + (e.message || ""), "error"); }
+  }, [adminToken, refreshOrders, showToast]);
+
+  return (
+    <div style={{ padding: 16 }} className="animate-fadeIn">
+      <BackBar onBack={nav.home} title={t("deliveryDashboard")} />
+      <div className="tab-bar scrollhide" style={{ marginTop: 12 }}>
+        <button onClick={() => setTab("available")} className={`tab-btn ${tab==="available"?"active":""}`}>Available</button>
+        <button onClick={() => setTab("active")} className={`tab-btn ${tab==="active"?"active":""}`}>Active</button>
+        <button onClick={() => setTab("history")} className={`tab-btn ${tab==="history"?"active":""}`}>History</button>
+      </div>
+      {tab === "available" && <DeliveryOrderList orders={available} allOrders={orders} empty={t("noAvailableOrders")} t={t} showClaimBtn handleClaim={handleClaim} showToast={showToast} productMap={productMap} />}
+      {tab === "active" && <DeliveryOrderList orders={active} allOrders={orders} empty={t("noActiveOrders")} t={t} showProductDetails showRoute handlePickup={handlePickup} handleDeliver={handleDeliver} admins={admins} showToast={showToast} productMap={productMap} />}
+      {tab === "history" && <DeliveryOrderList orders={history} allOrders={orders} empty={t("noHistory")} t={t} showToast={showToast} productMap={productMap} />}
+    </div>
+  );
+});
+
+// ===== ORDER LIST =====
+const OrderList = memo(({ orders, empty, actions, t, showOTP, productMap }) => {
+  if (!orders.length) return <div className="empty-state"><div className="icon">📋</div><div>{empty}</div></div>;
+  return <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 12 }}>{orders.map(o => (
+    <div key={o.id} className="order-card">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+        <div>
+          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 600, textTransform: "uppercase" }}>Order</div>
+          <div style={{ fontSize: 16, fontWeight: 800, fontFamily: "var(--font-display)" }}>{o.id}</div>
+        </div>
+        <StatusBadge status={o.orderStatus} />
+      </div>
+      <div style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 4 }}>{o.customerName} · {o.customerPhone}</div>
+
+      {/* ===== MULTI-SELLER DISPLAY ===== */}
+      <SellerGroups order={o} productMap={productMap} t={t} />
+
+      <div style={{ fontSize: 18, fontWeight: 800, fontFamily: "var(--font-display)", color: "var(--brand-gold-dark)", marginBottom: 8 }}>{etb(o.total)}</div>
+      {o.deliveryName && <div style={{ fontSize: 12, color: "var(--text-tertiary)", marginBottom: 8 }}><Icon name="Truck" size={12} /> Driver: {o.deliveryName}</div>}
+      {showOTP && o.verificationCode && (
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 11, color: "var(--text-tertiary)", fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>{t("verificationCode")}</div>
+          <div className="otp-display" style={{ fontSize: 18, padding: "10px 16px" }}>{o.verificationCode}</div>
+          <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 4 }}>Give this OTP to the delivery driver for pickup verification</div>
+        </div>
+      )}
+      {actions && actions.map((act, i) => (
+        <div key={i} style={{ marginTop: i > 0 ? 6 : 0 }}>
+          {act.otpInput && (
+            <input 
+              value={act.otpState[o.id] || ""} 
+              onChange={e => act.setOtp(prev => ({ ...prev, [o.id]: e.target.value }))}
+              placeholder="Enter delivery OTP" 
+              className="input" 
+              style={{ marginBottom: 8, fontSize: 14 }}
+            />
+          )}
+          <button onClick={() => act.handler(o.id)} className="btn" style={{ width: "100%", ...act.style }}>{act.label}</button>
+        </div>
+      ))}
+    </div>
+  ))}</div>;
+});
+
+// ===== SELLER GROUPS COMPONENT =====
+const SellerGroups = memo(({ order, productMap, t }) => {
+  // Group items by seller
+  const sellerGroups = useMemo(() => {
+    if (!order.items || !Array.isArray(order.items)) return [];
+    const groups = {};
+    order.items.forEach(item => {
+      const product = productMap && productMap[item.id];
+      const sellerId = product ? (product.sellerId || product.sellerID || product.adminId || "default") : "default";
+      if (!groups[sellerId]) {
+        groups[sellerId] = { sellerId, items: [], subtotal: 0, weightCounts: { light: 0, medium: 0, heavy: 0 } };
+      }
+      groups[sellerId].items.push({ ...item, product });
+      const price = Number(item.price) || (product ? Number(product.price) : 0);
+      groups[sellerId].subtotal += price * (item.qty || 1);
+      const weight = item.weight || (product ? product.weight : "light") || "light";
+      groups[sellerId].weightCounts[weight] = (groups[sellerId].weightCounts[weight] || 0) + (item.qty || 1);
+    });
+    return Object.values(groups);
+  }, [order.items, productMap]);
+
+  // Calculate per-seller delivery fee
+  const zoneFee = Number(order.zoneFee) || 0;
+  const surcharge = Number(order.surcharge) || 0;
+  const totalDeliveryFee = Number(order.deliveryFee) || 0;
+  const isPickup = order.fulfilment === "pickup" || order.zoneName === "Pickup" || totalDeliveryFee === 0;
+
+  if (sellerGroups.length === 0) {
+    return <div style={{ fontSize: 12, color: "var(--text-tertiary)", marginBottom: 8 }}>{(order.items||[]).map(i=>`${i.name} x${i.qty}`).join(", ")}</div>;
+  }
+
+  return (
+    <div style={{ marginBottom: 12 }}>
+      {isPickup && (
+        <div className="pickup-badge" style={{ marginBottom: 10 }}>
+          <Icon name="Package" size={12} /> PICKUP ORDER — No Delivery Fee
+        </div>
+      )}
+      {sellerGroups.map((group, idx) => {
+        // Calculate seller's portion of delivery fee
+        let sellerDeliveryFee = 0;
+        if (!isPickup && sellerGroups.length > 0) {
+          // Split base zone fee equally among sellers, assign surcharges to the seller who has them
+          const basePerSeller = zoneFee / sellerGroups.length;
+          const groupSurcharge = (group.weightCounts.medium || 0) * (DEFAULT_MEDIUM_SURCHARGE) + 
+                                  (group.weightCounts.heavy || 0) * (DEFAULT_HEAVY_SURCHARGE);
+          sellerDeliveryFee = basePerSeller + groupSurcharge;
+        }
+
+        return (
+          <div key={group.sellerId + idx} className="seller-group">
+            <div className="seller-group-header">
+              <Icon name="Package" size={16} style={{ color: "var(--brand-green)" }} />
+              <span style={{ fontWeight: 700, fontSize: 14, color: "var(--text-primary)" }}>Seller {idx + 1}</span>
+              <span style={{ fontSize: 11, color: "var(--text-tertiary)", marginLeft: "auto" }}>
+                {etb(group.subtotal)} subtotal
+              </span>
+            </div>
+            <div className="seller-group-products">
+              {group.items.map((item, i) => {
+                const sellerAmount = Math.round((Number(item.price) || 0) * (item.qty || 1) * 0.9 * 100) / 100;
+                return (
+                  <div key={i} className="seller-group-product">
+                    <span>{item.name} x {item.qty}</span>
+                    <span style={{ color: "var(--text-secondary)" }}>
+                      {etb(Number(item.price) * (item.qty || 1))}
+                      <span style={{ fontSize: 11, color: "var(--brand-green)", marginLeft: 6 }}>
+                        (Seller: {etb(sellerAmount)})
+                      </span>
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            {!isPickup && (
+              <div className="seller-group-fee">
+                <span style={{ color: "var(--text-secondary)" }}>Seller Delivery Fee</span>
+                <span style={{ color: "var(--brand-gold-dark)" }}>{etb(sellerDeliveryFee)}</span>
+              </div>
+            )}
+          </div>
+        );
+      })}
+      {!isPickup && sellerGroups.length > 1 && (
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "var(--brand-green-soft)", borderRadius: 12, fontWeight: 700, fontSize: 14, marginTop: 8 }}>
+          <span style={{ color: "var(--brand-green)" }}><Icon name="Truck" size={14} /> Total Delivery Fee</span>
+          <span style={{ color: "var(--brand-green-dark)" }}>{etb(totalDeliveryFee)}</span>
+        </div>
+      )}
+    </div>
+  );
+});
+
+// ===== DELIVERY ORDER CARD =====
+const DeliveryOrderCard = memo(({ o, allOrders, t, showClaimBtn, handleClaim, showProductDetails, showRoute, handlePickup, handleDeliver, admins, showToast, productMap }) => {
+  // The order shown here is the parent — real seller/OTP info lives on its sub-orders
+  // (one per seller). o.sellerId/o.verificationCode are always blank on the parent,
+  // which is why this used to show "Unknown location" with no visible OTP.
+  const subOrders = (allOrders || []).filter(s => s.parentOrderId === o.id);
+  const pickups = subOrders.map(sub => {
+    const seller = (sub.sellerId && admins) ? admins.find(a => a.AdminID === sub.sellerId) : null;
+    return {
+      subId: sub.id,
+      name: seller ? (seller.Name || "Unknown seller") : "Unassigned seller",
+      address: seller ? (seller.PickupAddress || "No address set") : "Not set",
+      phone: seller ? (seller.PickupPhone || "") : "",
+      otp: sub.verificationCode || ""
+    };
+  });
+  const firstAddr = pickups[0]?.address || "Not set";
+  const mapsLink = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(firstAddr)}&destination=${encodeURIComponent(o.address)}&travelmode=driving`;
+  const [otpInput, setOtpInput] = useState("");
+  const [proofFile, setProofFile] = useState(null);
+  const [delivering, setDelivering] = useState(false);
+  const [pickingUp, setPickingUp] = useState(false);
+
+  // FIX: Memoized driver earnings calculation
+  const driverEarnings = useMemo(() => {
+    const fee = Number(o.deliveryFee) || 0;
+    return Math.round(fee * 0.7 * 100) / 100;
+  }, [o.deliveryFee]);
+
+  async function doDeliver() {
+    if (!otpInput.trim()) { showToast?.("Enter the customer OTP", "warning"); return; }
+    setDelivering(true);
+    let proofUrl = "";
+    if (proofFile) { try { proofUrl = await smartUpload(proofFile); } catch(e) {} }
+    await handleDeliver(o.id, otpInput, proofUrl);
+    setDelivering(false);
+  }
+
+  async function doPickup() {
+    setPickingUp(true);
+    await handlePickup(o.id);
+    setPickingUp(false);
+  }
+
+  const isPickup = o.fulfilment === "pickup" || o.zoneName === "Pickup" || (o.deliveryFee || 0) === 0;
+
+  return (
+    <div className="order-card">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+        <div>
+          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 600, textTransform: "uppercase" }}>Order</div>
+          <div style={{ fontSize: 16, fontWeight: 800, fontFamily: "var(--font-display)" }}>{o.id}</div>
+        </div>
+        <StatusBadge status={o.orderStatus} />
+      </div>
+      <div style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 4 }}>{o.customerName} · {o.customerPhone}</div>
+      <div style={{ fontSize: 12, color: "var(--text-tertiary)", marginBottom: 4 }}>{o.address}</div>
+
+      {isPickup && (
+        <div className="pickup-badge" style={{ marginBottom: 10, marginTop: 6 }}>
+          <Icon name="Package" size={12} /> PICKUP ORDER
+        </div>
+      )}
+
+      {showProductDetails && (
+        <div style={{ marginTop: 10, padding: 10, background: "var(--bg-secondary)", borderRadius: 10 }}>
+          <SellerGroups order={o} productMap={productMap} t={t} />
+        </div>
+      )}
+
+      {showRoute && !isPickup && pickups.length > 0 && (
+        <div style={{ marginTop: 10, padding: 12, background: "var(--bg-secondary)", borderRadius: 10 }}>
+          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 8, color: "var(--text-primary)" }}><Icon name="Navigation" size={14} /> {t("deliveryRoute")} {pickups.length > 1 && `(${pickups.length} sellers)`}</div>
+          {pickups.map((p, i) => (
+            <div key={p.subId} style={{ marginBottom: i < pickups.length - 1 ? 10 : 8, paddingBottom: i < pickups.length - 1 ? 10 : 0, borderBottom: i < pickups.length - 1 ? "1px solid var(--border)" : "none" }}>
+              <div style={{ fontSize: 12, fontWeight: 600 }}>{p.name}</div>
+              <div style={{ fontSize: 12 }}>{p.address}</div>
+              {p.phone && <div style={{ fontSize: 12 }}><a href={`tel:${p.phone}`} style={{ color: "var(--brand-green)" }}>{p.phone}</a></div>}
+              {p.otp && (o.orderStatus === "Driver Assigned" || o.orderStatus === "Ready for Pickup") && (
+                <div style={{ marginTop: 6 }}>
+                  <span style={{ fontSize: 11, color: "var(--text-tertiary)", textTransform: "uppercase" }}>Give this OTP to {p.name}: </span>
+                  <span className="otp-display" style={{ fontSize: 15, padding: "4px 10px", display: "inline-block", marginLeft: 4 }}>{p.otp}</span>
+                </div>
+              )}
+            </div>
+          ))}
+          <div style={{ fontSize: 12, marginBottom: 8 }}><strong>{t("to")}:</strong> {o.address}</div>
+          <a href={mapsLink} target="_blank" rel="noreferrer" className="map-link"><Icon name="MapPin" size={14} /> Google Maps</a>
+        </div>
+      )}
+
+      <div style={{ fontSize: 18, fontWeight: 800, fontFamily: "var(--font-display)", color: "var(--brand-gold-dark)", marginTop: 10, marginBottom: 8 }}>
+        Your Earnings (70%): {etb(driverEarnings)}
+      </div>
+
+      {showClaimBtn && <button onClick={() => handleClaim(o.id)} className="btn btn-primary" style={{ width: "100%" }}>{t("claim")}</button>}
+
+      {handlePickup && (o.orderStatus === "Driver Assigned" || o.orderStatus === "Ready for Pickup") && (
+        <button onClick={doPickup} disabled={pickingUp} className="btn btn-gold" style={{ width: "100%", marginTop: 8 }}>
+          {pickingUp ? <><span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> Processing...</> : "Mark as Picked Up / Out for Delivery"}
+        </button>
+      )}
+
+      {handleDeliver && o.orderStatus === "Out for Delivery" && (
+        <div style={{ marginTop: 8 }}>
+          <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 600, marginBottom: 6, textTransform: "uppercase" }}>Customer Delivery OTP</div>
+          <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginBottom: 8 }}>Ask the customer for their OTP from the order tracking page</div>
+          <input value={otpInput} onChange={e => setOtpInput(e.target.value)} placeholder="Enter customer OTP" className="input" style={{ marginBottom: 8 }} />
+          <input type="file" accept="image/*" onChange={e => setProofFile(e.target.files[0] || null)} className="input" style={{ padding: "8px", marginBottom: 8 }} />
+          <button onClick={doDeliver} disabled={delivering || !otpInput.trim()} className="btn btn-primary" style={{ width: "100%" }}>
+            {delivering ? <><span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> Processing...</> : t("markDelivered")}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+});
+
+const DeliveryOrderList = memo(({ orders, allOrders, empty, t, showClaimBtn, handleClaim, showProductDetails, showRoute, handlePickup, handleDeliver, admins, showToast, productMap }) => {
+  if (!orders.length) return <div className="empty-state"><div className="icon">🚚</div><div>{empty}</div></div>;
+  return (
+    <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+      {orders.map(o => (
+        <DeliveryOrderCard
+          key={o.id}
+          o={o}
+          allOrders={allOrders}
+          t={t}
+          showClaimBtn={showClaimBtn}
+          handleClaim={handleClaim}
+          showProductDetails={showProductDetails}
+          showRoute={showRoute}
+          handlePickup={handlePickup}
+          handleDeliver={handleDeliver}
+          admins={admins}
+          showToast={showToast}
+          productMap={productMap}
+        />
+      ))}
+    </div>
+  );
+});
+
+// ===== OWNER ORDERS =====
+const OwnerOrders = memo(({ orders, refreshOrders, showToast, t, admins, adminToken, productMap }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+
+  // FIX: Memoized filtering to avoid recalculation on every render
+  // Only show parent orders as cards — each parent aggregates one or more sub-orders
+  // (one per seller). Showing sub-orders as separate top-level cards duplicated the
+  // order and always showed "Seller: Unknown" on the parent (which has no single
+  // sellerId by design).
+  const parentOrders = useMemo(() => orders.filter(o => !o.parentOrderId), [orders]);
+  const filtered = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    return parentOrders.filter(o => {
+      const matchesSearch = !term || 
+        (o.id && o.id.toLowerCase().includes(term)) || 
+        (o.customerName && o.customerName.toLowerCase().includes(term));
+      const matchesStatus = statusFilter === "All" || o.orderStatus === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [parentOrders, searchTerm, statusFilter]);
+
+  const deliveryAdmins = useMemo(() => {
+    return admins.filter(a => a.Role === "delivery" && a.Status === "active");
+  }, [admins]);
+
+  // FIX: Memoized callback handlers to avoid recreation
+  const updateStatus = useCallback(async (id, field, value) => {
+    try { 
+      await apiPost("updateOrder", { id, updates: { [field]: value } }); 
+      refreshOrders(); 
+      showToast("Updated"); 
+    }
+    catch(e) { showToast("Update failed", "error"); }
+  }, [refreshOrders, showToast]);
+
+  const assignDriver = useCallback(async (orderId, adminId) => {
+    try { 
+      await apiPost("ownerAssignDriver", { orderId, adminId }); 
+      refreshOrders(); 
+      showToast("Driver assigned"); 
+    }
+    catch(e) { showToast("Failed", "error"); }
+  }, [refreshOrders, showToast]);
+
+  const verifyPayment = useCallback(async (orderId) => {
+    if (!confirm("Mark payment as verified? Sellers will be notified.")) return;
+    try {
+      const res = await apiPost("verifyPayment", { orderId, token: adminToken });
+      if (!res || !res.success) {
+        showToast("Failed to verify: " + ((res && res.error) || "Unknown error"), "error");
+        return;
+      }
+      refreshOrders();
+      showToast("Payment verified. Sellers notified.");
+    } catch(e) {
+      showToast("Failed: " + e.message, "error");
+    }
+  }, [adminToken, refreshOrders, showToast]);
+
+  const rejectPayment = useCallback(async (orderId) => {
+    const reason = prompt("Reason for rejecting this payment (optional):") || "";
+    if (!confirm("Reject this payment? The order will be cancelled and never sent to sellers.")) return;
+    try {
+      const res = await apiPost("rejectPayment", { orderId, token: adminToken, reason });
+      if (!res || !res.success) {
+        showToast("Failed to reject: " + ((res && res.error) || "Unknown error"), "error");
+        return;
+      }
+      refreshOrders();
+      showToast("Payment rejected. Order cancelled.");
+    } catch(e) {
+      showToast("Failed: " + e.message, "error");
+    }
+  }, [adminToken, refreshOrders, showToast]);
+
+  return (
+    <div style={{ marginTop: 12 }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
+        <input placeholder="Search orders..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="input" style={{ flex: 1, minWidth: 200 }} />
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="input" style={{ width: "auto", minWidth: 160 }}>
+          <option value="All">All Statuses</option>
+          {ORDER_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+      </div>
+      {filtered.length === 0 ? <div className="empty-state"><div className="icon">📋</div><div>No orders found.</div></div>
+        : <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>{filtered.map(o => {
+          const subs = orders.filter(s => s.parentOrderId === o.id);
+          const sellerEntries = subs.map(sub => {
+            const seller = admins.find(a => a.AdminID === sub.sellerId);
+            return { name: seller ? (seller.Name || "Unknown") : "Unknown", phone: seller ? (seller.PickupPhone || "") : "" };
+          });
+          const sellerName = sellerEntries.length > 0 ? sellerEntries.map(s => s.name).join(", ") : "Not yet assigned";
+          const pickupPhone = sellerEntries.length === 1 ? sellerEntries[0].phone : "";
+          const isPendingPayment = o.orderStatus === "Pending Payment Verification";
+          const isPaymentVerified = o.orderStatus === "Payment Verified";
+          const isPickup = o.fulfilment === "pickup" || o.zoneName === "Pickup" || (o.deliveryFee || 0) === 0;
+
+          return (
+            <div key={o.id} className="order-card">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
+                <div>
+                  <div style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 600, textTransform: "uppercase" }}>Order</div>
+                  <div style={{ fontSize: 18, fontWeight: 800, fontFamily: "var(--font-display)" }}>{o.id}</div>
+                  <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>{formatDate(o.createdAt)}</div>
+                </div>
+                <StatusBadge status={o.orderStatus} />
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 8, fontSize: 13, color: "var(--text-secondary)", marginBottom: 10 }}>
+                <div><strong style={{ color: "var(--text-primary)" }}>{t("customerName")}:</strong> {o.customerName}</div>
+                <div><strong style={{ color: "var(--text-primary)" }}>{t("customerPhone")}:</strong> <a href={`tel:${o.customerPhone}`} style={{ color: "var(--brand-green)", textDecoration: "none" }}>{o.customerPhone}</a></div>
+                <div><strong style={{ color: "var(--text-primary)" }}>{t("address")}:</strong> {o.address}</div>
+                <div><strong style={{ color: "var(--text-primary)" }}>{t("total")}:</strong> <span style={{ color: "var(--brand-gold-dark)", fontWeight: 700 }}>{etb(o.total)}</span></div>
+              </div>
+
+              {/* ===== PICKUP BADGE ===== */}
+              {isPickup && (
+                <div className="pickup-badge" style={{ marginBottom: 10 }}>
+                  <Icon name="Package" size={12} /> PICKUP ORDER — Customer Collects
+                </div>
+              )}
+
+              {/* ===== MULTI-SELLER DISPLAY ===== */}
+              <SellerGroups order={o} productMap={productMap} t={t} />
+
+              <div style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 8 }}>
+                <strong style={{ color: "var(--text-primary)" }}>Seller:</strong> {sellerName}
+                {pickupPhone && <> · <a href={`tel:${pickupPhone}`} style={{ color: "var(--brand-green)", textDecoration: "none" }}>{pickupPhone}</a></>}
+              </div>
+
+              {o.deliveryName && <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 8 }}><Icon name="Truck" size={12} /> Driver: {o.deliveryName} {o.deliveryPhone && `· ${o.deliveryPhone}`}</div>}
+
+              {o.verificationCode && (
+                <div style={{ marginBottom: 10 }}>
+                  <div style={{ fontSize: 11, color: "var(--text-tertiary)", fontWeight: 600, textTransform: "uppercase" }}>Handover OTP</div>
+                  <div className="otp-display" style={{ fontSize: 16, padding: "8px 12px", display: "inline-block" }}>{o.verificationCode}</div>
+                </div>
+              )}
+
+              {/* ===== PAYMENT VERIFICATION ===== */}
+              {isPendingPayment && (
+                <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                  <button onClick={() => verifyPayment(o.id)} className="btn btn-gold" style={{ flex: 1 }}>
+                    <Icon name="CheckCircle2" size={14} /> Verify Payment
+                  </button>
+                  <button onClick={() => rejectPayment(o.id)} className="btn btn-danger" style={{ flex: 1 }}>
+                    <Icon name="X" size={14} /> Reject Payment
+                  </button>
+                </div>
+              )}
+              {isPaymentVerified && (
+                <div style={{ marginTop: 8, padding: 8, background: "var(--success-soft)", borderRadius: 8, color: "var(--success)", fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
+                  <Icon name="CheckCircle2" size={14} /> Payment Verified — Sellers Notified
+                </div>
+              )}
+
+              {/* ===== STATUS UPDATES ===== */}
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
+                <select value={o.orderStatus} onChange={e => updateStatus(o.id, "orderStatus", e.target.value)} className="input" style={{ flex: 1, minWidth: 160, fontSize: 12, padding: "8px 12px" }}>
+                  {ORDER_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+                <select value={o.paymentStatus || "Pending"} onChange={e => updateStatus(o.id, "paymentStatus", e.target.value)} className="input" style={{ flex: 1, minWidth: 140, fontSize: 12, padding: "8px 12px" }}>
+                  {PAYMENT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+
+              {/* ===== DRIVER ASSIGNMENT ===== */}
+              {/* Only show driver assignment for delivery orders after payment is verified */}
+              {!isPickup && !o.deliveryName && (o.orderStatus === "Accepted by Seller" || o.orderStatus === "Payment Verified" || o.orderStatus === "Pending Seller Approval") && (
+                <div style={{ marginTop: 10 }}>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: "var(--text-secondary)", display: "block", marginBottom: 6 }}>Assign Driver</label>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {deliveryAdmins.map(d => (
+                      <button key={d.AdminID} onClick={() => assignDriver(o.id, d.AdminID)} className="btn btn-sm btn-secondary" style={{ fontSize: 11 }}>
+                        {d.Name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}</div>}
+    </div>
+  );
+});
+
+// ===== OWNER PRODUCTS =====
+const OwnerProducts = memo(({ products, refreshProducts, categories, admins, showToast, t }) => {
+  const [editing, setEditing] = useState(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const [form, setForm] = useState({ id: "", name: "", category: "", price: "", weight: "light", stock: "", description: "", image: "", sellerId: "" });
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const sellers = (admins || []).filter(a => a.Role === "seller");
+  const sellerName = (id) => { const s = sellers.find(x => x.AdminID === id); return s ? s.Name : ""; };
+
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [bulkSellerId, setBulkSellerId] = useState("");
+  const [bulkAssigning, setBulkAssigning] = useState(false);
+  function toggleSelect(id) { setSelectedIds(ids => ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id]); }
+  function selectAll() { setSelectedIds(products.map(p => p.id)); }
+  function clearSelection() { setSelectedIds([]); }
+  async function applyBulkAssign() {
+    if (!bulkSellerId || selectedIds.length === 0) { showToast("Pick a seller and at least one product", "warning"); return; }
+    setBulkAssigning(true);
+    try {
+      const res = await apiPost("bulkAssignSeller", { productIds: selectedIds, sellerId: bulkSellerId });
+      if (!res || !res.success) { showToast("Failed: " + ((res && res.error) || "Unknown error"), "error"); setBulkAssigning(false); return; }
+      showToast(`Assigned ${res.updated} product(s) to ${sellerName(bulkSellerId)}`);
+      clearSelection();
+      setBulkSellerId("");
+      refreshProducts();
+    } catch(e) { showToast("Failed", "error"); }
+    setBulkAssigning(false);
+  }
+
+  function startEdit(p) { setEditing(p.id); setForm({ ...p, price: String(p.price), stock: String(p.stock), sellerId: p.sellerId || "" }); setSuggestions(null); setSuggestQuery(""); }
+  function startAdd() { setShowAdd(true); setForm({ id: "", name: "", category: categories[0]?.id || "", price: "", weight: "light", stock: "", description: "", image: "", sellerId: "" }); setSuggestions(null); setSuggestQuery(""); }
+  function cancel() { setEditing(null); setShowAdd(false); }
+
+  async function handleImageUpload(file) {
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const url = await smartUpload(file);
+      if (url) setForm(f => ({ ...f, image: url }));
+      showToast("Image uploaded");
+    } catch(e) {
+      showToast("Upload failed", "error");
+    }
+    setUploadingImage(false);
+  }
+
+  const [suggestQuery, setSuggestQuery] = useState("");
+  const [suggestions, setSuggestions] = useState(null);
+  const [suggesting, setSuggesting] = useState(false);
+  const [adoptingUrl, setAdoptingUrl] = useState(null);
+
+  async function searchSuggestions(query) {
+    const q = (query || form.name || "").trim();
+    if (!q) { showToast("Enter a product name first", "warning"); return; }
+    setSuggesting(true);
+    setSuggestions(null);
+    try {
+      const res = await apiGet("searchProductImages", { query: q });
+      if (!res || !res.success) {
+        showToast(res && res.error ? res.error : "Image search failed", "error");
+        setSuggestions([]);
+      } else {
+        setSuggestions(res.images || []);
+      }
+    } catch(e) {
+      showToast("Image search failed", "error");
+      setSuggestions([]);
+    }
+    setSuggesting(false);
+  }
+
+  async function adoptSuggestion(imageUrl) {
+    setAdoptingUrl(imageUrl);
+    try {
+      const res = await apiPost("uploadImageFromUrl", { imageUrl });
+      if (!res || !res.success) {
+        showToast(res && res.error ? res.error : "Couldn't use that image", "error");
+      } else {
+        setForm(f => ({ ...f, image: res.url }));
+        setSuggestions(null);
+        showToast("Image set");
+      }
+    } catch(e) {
+      showToast("Couldn't use that image", "error");
+    }
+    setAdoptingUrl(null);
+  }
+
+  async function save() {
+    try {
+      if (showAdd) {
+        const id = "PRD-" + Math.random().toString(36).slice(2, 8).toUpperCase();
+        await apiPost("addProduct", { product: { ...form, id, price: Number(form.price), stock: Number(form.stock) } });
+        showToast("Product added");
+      } else {
+        await apiPost("updateProduct", { id: editing, updates: { ...form, price: Number(form.price), stock: Number(form.stock) } });
+        showToast("Product updated");
+      }
+      refreshProducts(); cancel();
+    } catch(e) { showToast("Failed", "error"); }
+  }
+
+  async function del(id) {
+    if (!confirm("Delete this product?")) return;
+    try { await apiPost("deleteProduct", { id }); refreshProducts(); showToast("Deleted"); }
+    catch(e) { showToast("Failed", "error"); }
+  }
+
+  return (
+    <div style={{ marginTop: 12 }}>
+      <button onClick={startAdd} className="btn btn-primary btn-sm" style={{ marginBottom: 12 }}><Icon name="Plus" size={14} /> Add Product</button>
+      {(showAdd || editing) && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <h4 className="font-display" style={{ marginBottom: 12 }}>{showAdd ? "Add Product" : "Edit Product"}</h4>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
+            <div><label className="text-sm font-semibold text-secondary">Name</label><input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="input" /></div>
+            <div><label className="text-sm font-semibold text-secondary">Category</label><select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} className="input">{categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
+            <div><label className="text-sm font-semibold text-secondary">Price</label><input type="number" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} className="input" /></div>
+            <div><label className="text-sm font-semibold text-secondary">Stock</label><input type="number" value={form.stock} onChange={e => setForm(f => ({ ...f, stock: e.target.value }))} className="input" /></div>
+            <div><label className="text-sm font-semibold text-secondary">Weight</label><select value={form.weight} onChange={e => setForm(f => ({ ...f, weight: e.target.value }))} className="input"><option value="light">Light</option><option value="medium">Medium</option><option value="heavy">Heavy</option></select></div>
+            <div>
+              <label className="text-sm font-semibold text-secondary">Seller</label>
+              <select value={form.sellerId} onChange={e => setForm(f => ({ ...f, sellerId: e.target.value }))} className="input">
+                <option value="">Auto (by category)</option>
+                {sellers.map(s => <option key={s.AdminID} value={s.AdminID}>{s.Name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-secondary">Image</label>
+              <input type="file" accept="image/*" onChange={e => handleImageUpload(e.target.files[0])} className="input" style={{ padding: "10px" }} />
+              {uploadingImage && <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>Uploading...</span>}
+              {form.image && <div style={{ marginTop: 6, fontSize: 12, color: "var(--success)" }}>✅ Image uploaded</div>}
+            </div>
+          </div>
+
+          {!form.image && (
+            <div style={{ marginTop: 10 }}>
+              <div style={{ display: "flex", gap: 8 }}>
+                <input
+                  value={suggestQuery}
+                  onChange={e => setSuggestQuery(e.target.value)}
+                  placeholder={form.name ? `Search "${form.name}"...` : "What should I search for?"}
+                  className="input"
+                  style={{ flex: 1 }}
+                  onKeyDown={e => e.key === "Enter" && searchSuggestions(suggestQuery)}
+                />
+                <button onClick={() => searchSuggestions(suggestQuery)} disabled={suggesting} className="btn btn-secondary btn-sm" style={{ whiteSpace: "nowrap" }}>
+                  {suggesting ? "Searching..." : "Suggest Images"}
+                </button>
+              </div>
+              {suggestions && suggestions.length === 0 && (
+                <div style={{ fontSize: 12, color: "var(--text-tertiary)", marginTop: 8 }}>No results — try a different search.</div>
+              )}
+              {suggestions && suggestions.length > 0 && (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginTop: 10, maxHeight: 320, overflowY: "auto", paddingRight: 2 }}>
+                  {suggestions.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => adoptSuggestion(img.full)}
+                      disabled={adoptingUrl !== null}
+                      title={img.title}
+                      style={{ padding: 0, border: "2px solid var(--border)", borderRadius: 8, overflow: "hidden", cursor: "pointer", background: "none", aspectRatio: "1", position: "relative" }}
+                    >
+                      <img src={img.thumbnail} alt={img.title} style={{ width: "100%", height: "100%", objectFit: "cover", opacity: adoptingUrl === img.full ? 0.5 : 1 }} />
+                      {adoptingUrl === img.full && (
+                        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }} />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          <div style={{ marginTop: 10 }}><label className="text-sm font-semibold text-secondary">Description</label><textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="input" rows={2} /></div>
+          <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+            <button onClick={save} className="btn btn-primary btn-sm"><Icon name="Save" size={14} /> Save</button>
+            <button onClick={cancel} className="btn btn-secondary btn-sm">Cancel</button>
+          </div>
+        </div>
+      )}
+      {sellers.length > 0 && (
+        <div className="card" style={{ marginBottom: 12, padding: 12 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <div style={{ fontWeight: 700, fontSize: 13 }}>Bulk assign seller {selectedIds.length > 0 && `(${selectedIds.length} selected)`}</div>
+            <div style={{ display: "flex", gap: 6 }}>
+              <button onClick={selectAll} className="btn btn-ghost btn-sm" style={{ fontSize: 11, padding: "4px 8px" }}>Select all</button>
+              <button onClick={clearSelection} className="btn btn-ghost btn-sm" style={{ fontSize: 11, padding: "4px 8px" }}>Clear</button>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <select value={bulkSellerId} onChange={e => setBulkSellerId(e.target.value)} className="input" style={{ flex: 1 }}>
+              <option value="">Choose seller…</option>
+              {sellers.map(s => <option key={s.AdminID} value={s.AdminID}>{s.Name}</option>)}
+            </select>
+            <button onClick={applyBulkAssign} disabled={bulkAssigning || !bulkSellerId || selectedIds.length === 0} className="btn btn-primary btn-sm" style={{ whiteSpace: "nowrap" }}>
+              {bulkAssigning ? "Assigning…" : "Assign"}
+            </button>
+          </div>
+        </div>
+      )}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {products.map(p => (
+          <div key={p.id} className="order-card" style={{ display: "flex", gap: 12, alignItems: "center" }}>
+            {sellers.length > 0 && (
+              <input type="checkbox" checked={selectedIds.includes(p.id)} onChange={() => toggleSelect(p.id)} style={{ width: 18, height: 18, flexShrink: 0 }} />
+            )}
+            {p.image && <img src={p.image} alt="" style={{ width: 50, height: 50, borderRadius: 10, objectFit: "cover" }} />}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 700, fontSize: 14 }}>{p.name}</div>
+              <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>{etb(p.price)} · Stock: {p.stock} · {p.weight}</div>
+              <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 2 }}>
+                Seller: {p.sellerId ? (sellerName(p.sellerId) || "Unknown") : "Auto (by category)"}
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 6 }}>
+              <button onClick={() => startEdit(p)} className="btn btn-ghost btn-sm" style={{ padding: "6px 10px" }}><Icon name="Edit3" size={14} /></button>
+              <button onClick={() => del(p.id)} className="btn btn-ghost btn-sm" style={{ padding: "6px 10px", color: "var(--danger)" }}><Icon name="Trash2" size={14} /></button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+});
+
+// ===== OWNER CATEGORIES =====
+const OwnerCategories = memo(({ categories, refreshCategories, showToast, t }) => {
+  const [showAdd, setShowAdd] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [form, setForm] = useState({ id: "", name: "", description: "", parentId: "", image: "", banner: "", active: true });
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [togglingId, setTogglingId] = useState(null);
+
+  const handleImageUpload = async (file, field) => {
+    if (!file) return;
+    const setUploading = field === "image" ? setUploadingImage : setUploadingBanner;
+    setUploading(true);
+    try {
+      const url = await smartUpload(file);
+      if (url) setForm(f => ({ ...f, [field]: url }));
+      showToast("Image uploaded");
+    } catch(e) {
+      showToast("Upload failed", "error");
+    }
+    setUploading(false);
+  };
+
+  const startAdd = () => {
+    setEditId(null);
+    setForm({ id: "", name: "", description: "", parentId: "", image: "", banner: "", active: true });
+    setShowAdd(true);
+  };
+
+  const startEdit = (c) => {
+    setEditId(c.id);
+    setForm({
+      id: c.id, name: c.name || "", description: c.description || "", parentId: c.parentId || "",
+      image: c.image || "", banner: c.banner || "",
+      active: c.active !== false && c.active !== "FALSE" && c.active !== "false"
+    });
+    setShowAdd(true);
+  };
+
+  const save = async () => {
+    if (!form.name.trim()) { showToast("Category name is required", "warning"); return; }
+    try {
+      if (editId) {
+        await apiPost("updateCategory", { id: editId, updates: form });
+        showToast("Category updated");
+      } else {
+        const id = "CAT-" + Math.random().toString(36).slice(2, 8).toUpperCase();
+        await apiPost("addCategory", { category: { ...form, id } });
+        showToast("Category added");
+      }
+      refreshCategories();
+      setShowAdd(false);
+      setEditId(null);
+    } catch(e) {
+      showToast("Failed", "error");
+    }
+  };
+
+  const del = async (id) => {
+    if (!confirm("Delete this category?")) return;
+    try {
+      await apiPost("deleteCategory", { id });
+      refreshCategories();
+      showToast("Deleted");
+    } catch(e) {
+      showToast("Failed", "error");
+    }
+  };
+
+  // Only updates this category's active flag — never navigates anywhere.
+  const toggleActive = async (c) => {
+    const isActive = c.active !== false && c.active !== "FALSE" && c.active !== "false";
+    setTogglingId(c.id);
+    try {
+      await apiPost("updateCategory", { id: c.id, updates: { active: !isActive } });
+      await refreshCategories();
+      showToast(!isActive ? "Category activated" : "Category deactivated");
+    } catch(e) {
+      showToast("Failed to update", "error");
+    }
+    setTogglingId(null);
+  };
+
+  return (
+    <div style={{ marginTop: 12 }}>
+      <button onClick={startAdd} className="btn btn-primary btn-sm" style={{ marginBottom: 12 }}>
+        <Icon name="Plus" size={14} /> Add Category
+      </button>
+      {showAdd && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <h4 className="font-display" style={{ marginBottom: 12 }}>{editId ? "Edit Category" : "Add Category"}</h4>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
+            <div>
+              <label className="text-sm font-semibold text-secondary">Name</label>
+              <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Groceries" className="input" />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-secondary">Description</label>
+              <input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Optional short description" className="input" />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-secondary">Parent</label>
+              <select value={form.parentId} onChange={e => setForm(f => ({ ...f, parentId: e.target.value }))} className="input">
+                <option value="">None</option>
+                {categories.filter(c => c.id !== editId).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-secondary">Icon Image</label>
+              <input type="file" accept="image/*" onChange={e => handleImageUpload(e.target.files[0], "image")} className="input" style={{ padding: "10px" }} />
+              {uploadingImage && <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>Uploading...</span>}
+              {form.image && <div style={{ marginTop: 4, fontSize: 12, color: "var(--success)" }}>✅ Image uploaded</div>}
+              <input value={form.image} onChange={e => setForm(f => ({ ...f, image: e.target.value }))} placeholder="Or paste image URL" className="input" style={{ marginTop: 6, fontSize: 12 }} />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-secondary">Banner Image</label>
+              <input type="file" accept="image/*" onChange={e => handleImageUpload(e.target.files[0], "banner")} className="input" style={{ padding: "10px" }} />
+              {uploadingBanner && <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>Uploading...</span>}
+              {form.banner && <div style={{ marginTop: 4, fontSize: 12, color: "var(--success)" }}>✅ Banner uploaded</div>}
+              <input value={form.banner} onChange={e => setForm(f => ({ ...f, banner: e.target.value }))} placeholder="Or paste image URL" className="input" style={{ marginTop: 6, fontSize: 12 }} />
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <label className="text-sm font-semibold text-secondary">Active</label>
+              <button type="button" onClick={() => setForm(f => ({ ...f, active: !f.active }))} className={`toggle-switch ${form.active ? "active" : ""}`} />
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+            <button onClick={save} className="btn btn-primary btn-sm">{editId ? "Save Changes" : "Add"}</button>
+            <button onClick={() => { setShowAdd(false); setEditId(null); }} className="btn btn-secondary btn-sm">Cancel</button>
+          </div>
+        </div>
+      )}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {categories.map(c => {
+          const isActive = c.active !== false && c.active !== "FALSE" && c.active !== "false";
+          return (
+            <div key={c.id} className="order-card" style={{ display: "flex", gap: 12, alignItems: "center" }}>
+              {c.image && <img src={c.image} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} />}
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>{c.name}</div>
+                <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>Parent: {c.parentId || "None"}</div>
+              </div>
+              <span className={`badge ${isActive ? "badge-green" : "badge-gray"}`}>{isActive ? "Active" : "Inactive"}</span>
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleActive(c); }}
+                disabled={togglingId === c.id}
+                className={`toggle-switch ${isActive ? "active" : ""}`}
+                aria-label="Toggle category active"
+              />
+              <button onClick={() => startEdit(c)} className="btn btn-ghost btn-sm" style={{ padding: "6px 10px" }}>
+                <Icon name="Edit3" size={14} />
+              </button>
+              <button onClick={() => del(c.id)} className="btn btn-ghost btn-sm" style={{ color: "var(--danger)", padding: "6px 10px" }}>
+                <Icon name="Trash2" size={14} />
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+});
+
+// ===== OWNER TICKETS =====
+const OwnerTickets = memo(({ tickets, refreshTickets, showToast, t }) => {
+  return (
+    <div style={{ marginTop: 12 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {tickets.map(tk => (
+          <div key={tk.id} className="order-card">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <div style={{ fontWeight: 700, fontSize: 14 }}>{tk.category}</div>
+              <span className="badge badge-blue">{tk.status}</span>
+            </div>
+            <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>{tk.name} · {tk.phone}</div>
+            <div style={{ fontSize: 12, color: "var(--text-tertiary)", marginTop: 4 }}>{tk.message}</div>
+            <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 4 }}>{formatDate(tk.createdAt)}</div>
+          </div>
+        ))}
+        {tickets.length === 0 && <div className="empty-state"><div className="icon">🎫</div><div>No tickets yet.</div></div>}
+      </div>
+    </div>
+  );
+});
+
+// ===== OWNER ANALYTICS =====
+const OwnerAnalytics = memo(({ orders, products, t, productMap }) => {
+  // FIX: Memoized calculations
+  const stats = useMemo(() => {
+    const totalRevenue = orders.reduce((s, o) => s + (Number(o.total) || 0), 0);
+    const totalOrders = orders.length;
+    const activeCount = orders.filter(o => !["Delivered", "Rejected"].includes(o.orderStatus)).length;
+    const deliveredCount = orders.filter(o => o.orderStatus === "Delivered").length;
+    const pendingPaymentCount = orders.filter(o => o.orderStatus === "Pending Payment Verification").length;
+    const pickupCount = orders.filter(o => o.fulfilment === "pickup" || o.zoneName === "Pickup" || (o.deliveryFee || 0) === 0).length;
+    return { totalRevenue, totalOrders, activeCount, deliveredCount, pendingPaymentCount, pickupCount };
+  }, [orders]);
+
+  return (
+    <div style={{ marginTop: 12 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12, marginBottom: 24 }}>
+        <div className="stat-card"><div className="value">{stats.totalOrders}</div><div className="label">{t("totalOrders")}</div></div>
+        <div className="stat-card"><div className="value" style={{ color: "var(--brand-gold-dark)" }}>{etb(stats.totalRevenue)}</div><div className="label">{t("totalRevenue")}</div></div>
+        <div className="stat-card"><div className="value" style={{ color: "var(--info)" }}>{stats.activeCount}</div><div className="label">{t("activeOrders")}</div></div>
+        <div className="stat-card"><div className="value" style={{ color: "var(--success)" }}>{stats.deliveredCount}</div><div className="label">{t("completedToday")}</div></div>
+        <div className="stat-card"><div className="value" style={{ color: "var(--warning)" }}>{stats.pendingPaymentCount}</div><div className="label">Pending Payment</div></div>
+        <div className="stat-card"><div className="value" style={{ color: "var(--info)" }}>{stats.pickupCount}</div><div className="label">Pickup Orders</div></div>
+      </div>
+
+      <h3 className="font-display" style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>Recent Orders</h3>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {orders.slice(0, 10).map(o => (
+          <div key={o.id} className="order-card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 14 }}>{o.id}</div>
+              <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>{o.customerName} · {formatDate(o.createdAt)}</div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontWeight: 700, color: "var(--brand-gold-dark)" }}>{etb(o.total)}</div>
+              <StatusBadge status={o.orderStatus} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+});
+
+// ===== OWNER SETTINGS =====
+const OwnerSettings = memo(({ settings, refreshSettings, showToast, t }) => {
+  const [medium, setMedium] = useState(settings.mediumSurcharge);
+  const [heavy, setHeavy] = useState(settings.heavySurcharge);
+  const [paymentMethods, setPaymentMethods] = useState(
+    (settings.paymentMethods && settings.paymentMethods.length > 0) ? settings.paymentMethods : DEFAULT_PAYMENT_METHODS
+  );
+  const [savingPayments, setSavingPayments] = useState(false);
+  const [pickupLocations, setPickupLocations] = useState([]);
+  const [showPickupAdd, setShowPickupAdd] = useState(false);
+  const [pickupForm, setPickupForm] = useState({ name: "", address: "", phone: "", active: true });
+  const [editPickupId, setEditPickupId] = useState(null);
+
+  function updatePaymentMethod(id, field, value) {
+    setPaymentMethods(list => list.map(m => m.id === id ? { ...m, [field]: value } : m));
+  }
+
+  async function savePaymentMethods() {
+    setSavingPayments(true);
+    try {
+      await apiPost("updateSetting", { key: "paymentMethods", value: JSON.stringify(paymentMethods) });
+      refreshSettings();
+      showToast("Payment accounts saved");
+    } catch(e) { showToast("Failed", "error"); }
+    setSavingPayments(false);
+  }
+
+  const refreshPickupLocations = useCallback(async () => {
+    const locs = await loadPickupLocations();
+    setPickupLocations(locs);
+  }, []);
+
+  useEffect(() => { refreshPickupLocations(); }, []);
+
+  async function saveSettings() {
+    try {
+      await apiPost("updateSetting", { key: "mediumSurcharge", value: String(medium) });
+      await apiPost("updateSetting", { key: "heavySurcharge", value: String(heavy) });
+      refreshSettings(); showToast("Settings saved");
+    } catch(e) { showToast("Failed", "error"); }
+  }
+
+  async function savePickup() {
+    try {
+      if (editPickupId) {
+        await apiPost("updatePickupLocation", { id: editPickupId, updates: pickupForm });
+        showToast("Location updated");
+      } else {
+        await apiPost("addPickupLocation", { location: pickupForm });
+        showToast("Location added");
+      }
+      refreshPickupLocations();
+      setShowPickupAdd(false);
+      setEditPickupId(null);
+      setPickupForm({ name: "", address: "", phone: "", active: true });
+    } catch(e) {
+      showToast("Failed", "error");
+    }
+  }
+
+  function startEditPickup(loc) {
+    setEditPickupId(loc.id);
+    setPickupForm({ name: loc.name, address: loc.address, phone: loc.phone || "", active: loc.active !== "false" });
+    setShowPickupAdd(true);
+  }
+
+  async function deletePickup(id) {
+    if (!confirm("Delete this pickup location?")) return;
+    try {
+      await apiPost("deletePickupLocation", { id });
+      refreshPickupLocations();
+      showToast("Deleted");
+    } catch(e) {
+      showToast("Failed", "error");
+    }
+  }
+
+  return (
+    <div style={{ marginTop: 12 }}>
+      <div className="card">
+        <h4 className="font-display" style={{ marginBottom: 16 }}>Surcharge Settings</h4>
+        <div style={{ marginBottom: 14 }}>
+          <label className="text-sm font-semibold text-secondary" style={{ display: "block", marginBottom: 6 }}>Medium Item Surcharge (ETB)</label>
+          <input type="number" value={medium} onChange={e => setMedium(e.target.value)} className="input" />
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <label className="text-sm font-semibold text-secondary" style={{ display: "block", marginBottom: 6 }}>Heavy Item Surcharge (ETB)</label>
+          <input type="number" value={heavy} onChange={e => setHeavy(e.target.value)} className="input" />
+        </div>
+        <button onClick={saveSettings} className="btn btn-primary btn-sm"><Icon name="Save" size={14} /> Save Settings</button>
+      </div>
+
+      <div className="card" style={{ marginTop: 16 }}>
+        <h4 className="font-display" style={{ marginBottom: 8 }}>Payment Accounts</h4>
+        <div style={{ fontSize: 12, color: "var(--text-tertiary)", marginBottom: 16 }}>
+          These are the accounts customers are shown at checkout to send payment to. Edit the account number if it changes — no code changes needed.
+        </div>
+        {paymentMethods.map(m => (
+          <div key={m.id} style={{ marginBottom: 14, paddingBottom: 14, borderBottom: "1px solid var(--border)" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10 }}>
+              <div>
+                <label className="text-sm font-semibold text-secondary" style={{ display: "block", marginBottom: 6 }}>Name</label>
+                <input value={m.name} onChange={e => updatePaymentMethod(m.id, "name", e.target.value)} placeholder="e.g. CBE" className="input" />
+              </div>
+              <div>
+                <label className="text-sm font-semibold text-secondary" style={{ display: "block", marginBottom: 6 }}>Account / Phone Number</label>
+                <input value={m.account} onChange={e => updatePaymentMethod(m.id, "account", e.target.value)} placeholder="e.g. 1000771527148" className="input" />
+              </div>
+              <div>
+                <label className="text-sm font-semibold text-secondary" style={{ display: "block", marginBottom: 6 }}>Note</label>
+                <input value={m.note} onChange={e => updatePaymentMethod(m.id, "note", e.target.value)} placeholder="e.g. Commercial Bank of Ethiopia" className="input" />
+              </div>
+            </div>
+          </div>
+        ))}
+        <button onClick={savePaymentMethods} disabled={savingPayments} className="btn btn-primary btn-sm">
+          <Icon name="Save" size={14} /> {savingPayments ? "Saving…" : "Save Payment Accounts"}
+        </button>
+      </div>
+
+      <div className="card" style={{ marginTop: 16 }}>
+        <h4 className="font-display" style={{ marginBottom: 16 }}>Pickup Locations</h4>
+        <button onClick={() => { setShowPickupAdd(true); setEditPickupId(null); setPickupForm({ name: "", address: "", phone: "", active: true }); }} className="btn btn-primary btn-sm" style={{ marginBottom: 12 }}>
+          <Icon name="Plus" size={14} /> Add Pickup Location
+        </button>
+        {showPickupAdd && (
+          <div style={{ marginBottom: 16, padding: 12, background: "var(--bg-secondary)", borderRadius: 10 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
+              <div><label className="text-sm font-semibold text-secondary">Name</label><input value={pickupForm.name} onChange={e => setPickupForm(f => ({ ...f, name: e.target.value }))} className="input" /></div>
+              <div><label className="text-sm font-semibold text-secondary">Address</label><input value={pickupForm.address} onChange={e => setPickupForm(f => ({ ...f, address: e.target.value }))} className="input" /></div>
+              <div><label className="text-sm font-semibold text-secondary">Phone (optional)</label><input value={pickupForm.phone} onChange={e => setPickupForm(f => ({ ...f, phone: e.target.value }))} className="input" /></div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <label className="text-sm font-semibold text-secondary">Active</label>
+                <button onClick={() => setPickupForm(f => ({ ...f, active: !f.active }))} className={`toggle-switch ${pickupForm.active ? "active" : ""}`} />
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+              <button onClick={savePickup} className="btn btn-primary btn-sm"><Icon name="Save" size={14} /> Save</button>
+              <button onClick={() => { setShowPickupAdd(false); setEditPickupId(null); }} className="btn btn-secondary btn-sm">Cancel</button>
+            </div>
+          </div>
+        )}
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {pickupLocations.map(loc => (
+            <div key={loc.id} className="order-card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>{loc.name}</div>
+                <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>{loc.address} {loc.phone && `· ${loc.phone}`}</div>
+              </div>
+              <div style={{ display: "flex", gap: 6 }}>
+                <button onClick={() => startEditPickup(loc)} className="btn btn-ghost btn-sm"><Icon name="Edit3" size={14} /></button>
+                <button onClick={() => deletePickup(loc.id)} className="btn btn-ghost btn-sm" style={{ color: "var(--danger)" }}><Icon name="Trash2" size={14} /></button>
+              </div>
+            </div>
+          ))}
+          {pickupLocations.length === 0 && <div className="empty-state"><div className="icon">📍</div><div>No pickup locations configured.</div></div>}
+        </div>
+      </div>
+    </div>
+  );
+});
+
+// ===== OWNER ADMINS =====
+const OwnerAdmins = memo(({ admins, refreshAdmins, showToast, t, categories, products, refreshProducts }) => {
+  const [showAdd, setShowAdd] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [form, setForm] = useState({ name: "", password: "", role: "seller", categoryAccess: "", status: "active", telegramId: "", phone: "", pickupAddress: "", pickupPhone: "", vehicle: "", photoUrl: "" });
+  const [productAccessIds, setProductAccessIds] = useState([]);
+  const [savingId, setSavingId] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  function emptyForm() { return { name: "", password: "", role: "seller", categoryAccess: "", status: "active", telegramId: "", phone: "", pickupAddress: "", pickupPhone: "", vehicle: "", photoUrl: "" }; }
+  function startAdd() { setEditId(null); setForm(emptyForm()); setProductAccessIds([]); setShowAdd(true); }
+  function startEdit(a) {
+    setEditId(a.AdminID);
+    setForm({
+      name: a.Name || "", password: "", role: a.Role || "seller", categoryAccess: a.CategoryAccess || "",
+      status: a.Status || "active", telegramId: a.TelegramID || "", phone: a.Phone || "",
+      pickupAddress: a.PickupAddress || "", pickupPhone: a.PickupPhone || "", vehicle: a.Vehicle || "", photoUrl: a.PhotoUrl || ""
+    });
+    setProductAccessIds((products || []).filter(p => p.sellerId === a.AdminID).map(p => p.id));
+    setShowAdd(true);
+  }
+
+  async function add() {
+    if (!form.name.trim() || (!editId && !form.password.trim())) { showToast(editId ? "Name is required" : "Name and password are required", "warning"); return; }
+    setSaving(true);
+    try {
+      let adminId = editId;
+      if (editId) {
+        const updates = { ...form };
+        if (!updates.password) delete updates.password;
+        await apiPost("updateAdmin", { id: editId, updates });
+      } else {
+        const res = await apiPost("addAdmin", { admin: form });
+        if (!res || !res.success || !res.id) { showToast("Failed to add admin", "error"); setSaving(false); return; }
+        adminId = res.id;
+      }
+
+      // Sync product access: assign newly-checked products to this admin, and clear
+      // any that were unchecked. Reuses the same product.sellerId field the product
+      // form and bulk-assign tool use, so there's one source of truth either way.
+      if (form.role === "seller" && products) {
+        const previouslyAssigned = editId ? products.filter(p => p.sellerId === editId).map(p => p.id) : [];
+        const toAssign = productAccessIds.filter(id => !previouslyAssigned.includes(id));
+        const toUnassign = previouslyAssigned.filter(id => !productAccessIds.includes(id));
+        if (toAssign.length > 0) await apiPost("bulkAssignSeller", { productIds: toAssign, sellerId: adminId });
+        if (toUnassign.length > 0) await apiPost("bulkAssignSeller", { productIds: toUnassign, sellerId: "" });
+        if ((toAssign.length > 0 || toUnassign.length > 0) && refreshProducts) refreshProducts();
+      }
+
+      refreshAdmins(); setShowAdd(false); setEditId(null);
+      setForm(emptyForm()); setProductAccessIds([]);
+      showToast(editId ? "Admin updated" : "Admin added");
+    } catch(e) { showToast("Failed", "error"); }
+    setSaving(false);
+  }
+
+  async function del(id) {
+    if (!confirm("Delete this admin?")) return;
+    try { await apiPost("deleteAdmin", { id }); refreshAdmins(); showToast("Deleted"); }
+    catch(e) { showToast("Failed", "error"); }
+  }
+
+  // Only flips this admin's Status field — never navigates anywhere.
+  async function toggleStatus(a) {
+    const id = a.AdminID;
+    const isActive = a.Status === "active";
+    setSavingId(id);
+    try {
+      await apiPost("updateAdmin", { id, updates: { status: isActive ? "inactive" : "active" } });
+      await refreshAdmins();
+      showToast(isActive ? "Admin deactivated" : "Admin activated");
+    } catch(e) { showToast("Failed to update", "error"); }
+    setSavingId(null);
+  }
+
+  return (
+    <div style={{ marginTop: 12 }}>
+      <button onClick={startAdd} className="btn btn-primary btn-sm" style={{ marginBottom: 12 }}><Icon name="Plus" size={14} /> Add Admin</button>
+      {showAdd && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <h4 className="font-display" style={{ marginBottom: 12 }}>{editId ? "Edit Admin" : "Add Admin"}</h4>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
+            <div><label className="text-sm font-semibold text-secondary">Name</label><input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Abebe Kebede" className="input" /></div>
+            <div><label className="text-sm font-semibold text-secondary">Password</label><input type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} placeholder={editId ? "Leave blank to keep current password" : "Login password"} className="input" /></div>
+            <div>
+              <label className="text-sm font-semibold text-secondary">Role</label>
+              <select value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))} className="input">
+                <option value="owner">Owner</option>
+                <option value="seller">Seller</option>
+                <option value="delivery">Delivery</option>
+              </select>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <label className="text-sm font-semibold text-secondary">Status</label>
+              <button type="button" onClick={() => setForm(f => ({ ...f, status: f.status === "active" ? "inactive" : "active" }))} className={`toggle-switch ${form.status === "active" ? "active" : ""}`} />
+              <span style={{ fontSize: 12, color: "var(--text-tertiary)" }}>{form.status === "active" ? "Active" : "Inactive"}</span>
+            </div>
+            <div><label className="text-sm font-semibold text-secondary">Phone</label><input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="09xxxxxxxx" className="input" /></div>
+            <div><label className="text-sm font-semibold text-secondary">Telegram ID</label><input value={form.telegramId} onChange={e => setForm(f => ({ ...f, telegramId: e.target.value }))} placeholder="Numeric Telegram chat ID" className="input" /></div>
+            {form.role === "seller" && (
+              <>
+                <div><label className="text-sm font-semibold text-secondary">Pickup Address</label><input value={form.pickupAddress} onChange={e => setForm(f => ({ ...f, pickupAddress: e.target.value }))} placeholder="e.g. Piassa, near the bus stop" className="input" /></div>
+                <div><label className="text-sm font-semibold text-secondary">Pickup Phone</label><input value={form.pickupPhone} onChange={e => setForm(f => ({ ...f, pickupPhone: e.target.value }))} placeholder="09xxxxxxxx" className="input" /></div>
+              </>
+            )}
+            {form.role === "delivery" && (
+              <div><label className="text-sm font-semibold text-secondary">Vehicle</label><input value={form.vehicle} onChange={e => setForm(f => ({ ...f, vehicle: e.target.value }))} placeholder="e.g. Motorbike, Bajaj" className="input" /></div>
+            )}
+            <div><label className="text-sm font-semibold text-secondary">Photo URL</label><input value={form.photoUrl} onChange={e => setForm(f => ({ ...f, photoUrl: e.target.value }))} placeholder="Optional photo link" className="input" /></div>
+          </div>
+          {form.role === "seller" && (
+            <div style={{ marginTop: 10 }}>
+              <label className="text-sm font-semibold text-secondary" style={{ display: "block", marginBottom: 6 }}>
+                Category Access — which categories this seller manages
+              </label>
+              <div style={{ border: "1.5px solid var(--border)", borderRadius: 10, padding: 10, maxHeight: 220, overflowY: "auto", display: "flex", flexDirection: "column", gap: 6 }}>
+                {flattenCategoryOptions(categories, "").map(opt => {
+                  const selected = form.categoryAccess.split(",").map(x => x.trim()).filter(Boolean);
+                  const checked = selected.includes(opt.id);
+                  return (
+                    <label key={opt.id} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, cursor: "pointer" }}>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => {
+                          const next = checked ? selected.filter(id => id !== opt.id) : [...selected, opt.id];
+                          setForm(f => ({ ...f, categoryAccess: next.join(",") }));
+                        }}
+                        style={{ width: 16, height: 16, flexShrink: 0 }}
+                      />
+                      {opt.label}
+                    </label>
+                  );
+                })}
+                {categories.length === 0 && <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>No categories yet.</div>}
+              </div>
+              <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 6 }}>
+                Leave everything unchecked to let this seller receive orders from any category with no assigned seller.
+              </div>
+            </div>
+          )}
+          {form.role === "seller" && products && (
+            <div style={{ marginTop: 10 }}>
+              <label className="text-sm font-semibold text-secondary" style={{ display: "block", marginBottom: 6 }}>
+                Product Access — specific products this seller handles (overrides category-based matching for these)
+              </label>
+              <div style={{ border: "1.5px solid var(--border)", borderRadius: 10, padding: 10, maxHeight: 260, overflowY: "auto", display: "flex", flexDirection: "column", gap: 6 }}>
+                {products.map(p => {
+                  const checked = productAccessIds.includes(p.id);
+                  const takenByOther = p.sellerId && p.sellerId !== editId;
+                  return (
+                    <label key={p.id} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, cursor: "pointer", opacity: takenByOther && !checked ? 0.5 : 1 }}>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => {
+                          setProductAccessIds(ids => checked ? ids.filter(id => id !== p.id) : [...ids, p.id]);
+                        }}
+                        style={{ width: 16, height: 16, flexShrink: 0 }}
+                      />
+                      {p.name}
+                      {takenByOther && !checked && <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>(assigned to another seller)</span>}
+                    </label>
+                  );
+                })}
+                {products.length === 0 && <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>No products yet.</div>}
+              </div>
+              <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 6 }}>
+                Checking a product here reassigns it to this seller, even if it belongs to someone else.
+              </div>
+            </div>
+          )}
+          <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+            <button onClick={add} disabled={saving} className="btn btn-primary btn-sm">{saving ? "Saving…" : (editId ? "Save Changes" : "Add")}</button>
+            <button onClick={() => { setShowAdd(false); setEditId(null); }} className="btn btn-secondary btn-sm">Cancel</button>
+          </div>
+        </div>
+      )}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {admins.map(a => (
+          <div key={a.AdminID} className="order-card" style={{ display: "flex", gap: 12, alignItems: "center" }}>
+            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "var(--brand-green-soft)", color: "var(--brand-green)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 16, flexShrink: 0 }}>{a.Name?.[0] || "?"}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700, fontSize: 14 }}>{a.Name}</div>
+              <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>{a.Role} {a.Phone && `· ${a.Phone}`}</div>
+              {a.Role === "seller" && a.CategoryAccess && (
+                <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 2 }}>
+                  Categories: {a.CategoryAccess.split(",").map(id => categories.find(c => c.id === id.trim())?.name || id.trim()).join(", ")}
+                </div>
+              )}
+              {a.Role === "seller" && products && products.some(p => p.sellerId === a.AdminID) && (
+                <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 2 }}>
+                  Products: {products.filter(p => p.sellerId === a.AdminID).length} assigned
+                </div>
+              )}
+            </div>
+            <span className={`badge ${a.Status === "active" ? "badge-green" : "badge-gray"}`}>{a.Status === "active" ? "Active" : "Inactive"}</span>
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleStatus(a); }}
+              disabled={savingId === a.AdminID}
+              className={`toggle-switch ${a.Status === "active" ? "active" : ""}`}
+              aria-label="Toggle admin active"
+              title={a.Status === "active" ? "Active — tap to deactivate" : "Inactive — tap to activate"}
+            />
+            <button onClick={() => startEdit(a)} className="btn btn-ghost btn-sm" style={{ padding: "6px 10px" }}><Icon name="Edit3" size={14} /></button>
+            <button onClick={() => del(a.AdminID)} className="btn btn-ghost btn-sm" style={{ color: "var(--danger)", padding: "6px 10px" }}><Icon name="Trash2" size={14} /></button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+});
+
+// ===== OWNER ZONES =====
+const OwnerZones = memo(({ deliveryZones, refreshDeliveryZones, showToast, t }) => {
+  const [showAdd, setShowAdd] = useState(false);
+  const [form, setForm] = useState({ id: "", name: "", fee: "", eta: "" });
+
+  async function add() {
+    try {
+      await apiPost("addDeliveryZone", { zone: { ...form, id: form.id || "zone-" + Math.random().toString(36).slice(2, 6), fee: Number(form.fee) } });
+      refreshDeliveryZones(); setShowAdd(false); showToast("Zone added");
+    } catch(e) { showToast("Failed", "error"); }
+  }
+
+  async function del(id) {
+    if (!confirm("Delete this zone?")) return;
+    try { await apiPost("deleteDeliveryZone", { id }); refreshDeliveryZones(); showToast("Deleted"); }
+    catch(e) { showToast("Failed", "error"); }
+  }
+
+  return (
+    <div style={{ marginTop: 12 }}>
+      <button onClick={() => setShowAdd(true)} className="btn btn-primary btn-sm" style={{ marginBottom: 12 }}><Icon name="Plus" size={14} /> Add Zone</button>
+      {showAdd && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <h4 className="font-display" style={{ marginBottom: 12 }}>Add Delivery Zone</h4>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10 }}>
+            <div><label className="text-sm font-semibold text-secondary">ID</label><input value={form.id} onChange={e => setForm(f => ({ ...f, id: e.target.value }))} className="input" placeholder="e.g. piassa" /></div>
+            <div><label className="text-sm font-semibold text-secondary">Name</label><input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="input" /></div>
+            <div><label className="text-sm font-semibold text-secondary">Fee (ETB)</label><input type="number" value={form.fee} onChange={e => setForm(f => ({ ...f, fee: e.target.value }))} className="input" /></div>
+            <div><label className="text-sm font-semibold text-secondary">ETA</label><input value={form.eta} onChange={e => setForm(f => ({ ...f, eta: e.target.value }))} className="input" placeholder="15 min – 1 hr" /></div>
+          </div>
+          <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+            <button onClick={add} className="btn btn-primary btn-sm">Add</button>
+            <button onClick={() => setShowAdd(false)} className="btn btn-secondary btn-sm">Cancel</button>
+          </div>
+        </div>
+      )}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {deliveryZones.map(z => (
+          <div key={z.id} className="order-card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 14 }}>{z.name}</div>
+              <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>{etb(z.fee)} · {z.eta}</div>
+            </div>
+            <button onClick={() => del(z.id)} className="btn btn-ghost btn-sm" style={{ color: "var(--danger)", padding: "6px 10px" }}><Icon name="Trash2" size={14} /></button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+});
+
+// ===== BACK BAR =====
+const BackBar = memo(({ onBack, title }) => (
+  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
+    <button onClick={onBack} className="btn btn-secondary btn-sm" style={{ padding: 10, minWidth: 40, minHeight: 40, borderRadius: 12 }}>
+      <Icon name="ArrowLeft" size={18} />
+    </button>
+    <h2 className="font-display" style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>{title}</h2>
+  </div>
+));
+
+// ===== STATUS BADGE =====
+const StatusBadge = memo(({ status }) => {
+  const map = {
+    "Pending Payment Verification": { cls: "badge-gray", icon: "Clock" },
+    "Pending Seller Approval": { cls: "badge-gray", icon: "Clock" },
+    "Accepted by Seller": { cls: "badge-blue", icon: "CheckCircle2" },
+    "Driver Assigned": { cls: "badge-blue", icon: "Truck" },
+    "Ready for Pickup": { cls: "badge-gold", icon: "Package" },
+    "Out for Delivery": { cls: "badge-gold", icon: "Truck" },
+    "Delivered": { cls: "badge-green", icon: "CheckCircle2" },
+    "Rejected": { cls: "badge-red", icon: "X" },
+    "Payment Verified": { cls: "badge-green", icon: "CheckCircle2" }
+  };
+  const m = map[status] || map["Pending Payment Verification"];
+  return <span className={`badge ${m.cls}`}><Icon name={m.icon} size={12} /> {status}</span>;
+});
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <ToastProvider><AdminApp /></ToastProvider>
+);
+</script>
+</body>
+</html>
