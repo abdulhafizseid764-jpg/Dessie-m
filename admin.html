@@ -205,10 +205,30 @@ window.onerror = function(e,s,l,c) {
 <div id="root"></div>
 
 <!-- Shared code -->
-<script src="shared.js"></script>
+<script src="shared.js?v=sizes2"></script>
 
 <!-- Admin App -->
 <script>
+
+function getSizeRowsFromVariants(variantsStr) {
+  try {
+    let v = variantsStr;
+    if (!v) return [];
+    if (typeof v === "string") v = JSON.parse(v);
+    if (!Array.isArray(v) || !v.length) return [];
+    const choices = v[0].choices || [];
+    return choices.map(c => ({ label: c.label || "", price: c.price != null ? String(c.price) : "" }));
+  } catch (e) { return []; }
+}
+function sizeRowsToVariants(rows) {
+  const choices = (rows || []).filter(r => String(r.label || "").trim()).map(r => ({
+    label: String(r.label).trim(),
+    price: Number(r.price) || 0
+  }));
+  if (!choices.length) return "";
+  return JSON.stringify([{ name: "Size", choices: choices }]);
+}
+
 function AdminApp() {
   const [theme, setThemeState] = useState(getTheme());
   const [adminToken, setAdminTokenState] = useState(() => {
@@ -672,7 +692,7 @@ const AdminView = memo(({
     adminToken: adminToken,
     productMap: productMap
   });
-  const tabs = [["orders", "Orders", "ClipboardList"], ["products", "Products", "Package"], ["categories", "Categories", "Home"], ["tickets", "Support", "LifeBuoy"], ["analytics", "Analytics", "BarChart3"], ["settings", "Settings", "Settings"], ["admins", "Admins", "Shield"], ["zones", "Zones", "MapPin"]];
+  const tabs = [["orders", "Orders", "ClipboardList"], ["products", "Products", "Package"], ["categories", "Categories", "Home"], ["tickets", "Support", "LifeBuoy"], ["analytics", "Analytics", "BarChart3"], ["settings", "Settings", "Settings"], ["admins", "Admins", "Shield"], ["zones", "Zones", "MapPin"], ["tools", "Tools", "Settings"]];
   return React.createElement("div", {
     className: "animate-fadeIn"
   }, React.createElement("div", {
@@ -774,7 +794,163 @@ const AdminView = memo(({
     refreshDeliveryZones: refreshDeliveryZones,
     showToast: showToast,
     t: t
+  }), tab === "tools" && React.createElement(OwnerToolsPanel, {
+    adminToken: adminToken,
+    showToast: showToast,
+    admins: admins,
+    refreshAdmins: refreshAdmins
   })));
+});
+
+const OwnerToolsPanel = memo(({ adminToken, showToast, admins, refreshAdmins }) => {
+  const [promos, setPromos] = useState([]);
+  const [promoForm, setPromoForm] = useState({ code: "", type: "percent", value: "10", minOrder: "0" });
+  const [sms, setSms] = useState({ smsEnabled: "false", smsProvider: "africastalking", smsUsername: "", smsApiKey: "", smsFrom: "DessieMart", smsWebhookUrl: "" });
+  const [testPhone, setTestPhone] = useState("");
+  const [stats, setStats] = useState([]);
+  const [busy, setBusy] = useState(false);
+
+  const load = async () => {
+    try {
+      const r = await apiGet("listPromoCodes", { token: adminToken });
+      if (r && r.promos) setPromos(r.promos);
+      const st = await apiGet("getSellerStats", { token: adminToken });
+      if (st && st.stats) setStats(st.stats);
+      const keys = ["smsEnabled", "smsProvider", "smsUsername", "smsApiKey", "smsFrom", "smsWebhookUrl"];
+      const next = Object.assign({}, sms);
+      for (let i = 0; i < keys.length; i++) {
+        try {
+          const g = await apiGet("getSetting", { key: keys[i] });
+          if (g && g.value != null) next[keys[i]] = String(g.value);
+        } catch (e) {}
+      }
+      setSms(next);
+    } catch (e) {}
+  };
+  useEffect(() => { load(); }, [adminToken]);
+
+  const saveSms = async () => {
+    setBusy(true);
+    try {
+      const keys = Object.keys(sms);
+      for (let i = 0; i < keys.length; i++) {
+        await apiPost("setSettingValue", { key: keys[i], value: sms[keys[i]] });
+      }
+      showToast("SMS settings saved");
+    } catch (e) {
+      showToast("Save failed", "error");
+    }
+    setBusy(false);
+  };
+
+  const testSms = async () => {
+    setBusy(true);
+    try {
+      const r = await apiPost("testSMS", { phone: testPhone, message: "Dessie Mart test SMS. If you got this, SMS works." });
+      showToast(r && r.success ? "SMS sent" : ((r && r.error) || "SMS failed"), r && r.success ? "success" : "error");
+    } catch (e) {
+      showToast("SMS error", "error");
+    }
+    setBusy(false);
+  };
+
+  const savePromo = async () => {
+    setBusy(true);
+    try {
+      const r = await apiPost("savePromoCode", { token: adminToken, promo: { code: promoForm.code, type: promoForm.type, value: Number(promoForm.value), minOrder: Number(promoForm.minOrder), active: true } });
+      if (r && r.success) {
+        showToast("Promo saved");
+        setPromoForm({ code: "", type: "percent", value: "10", minOrder: "0" });
+        load();
+      } else showToast((r && r.error) || "Failed", "error");
+    } catch (e) {
+      showToast("Failed", "error");
+    }
+    setBusy(false);
+  };
+
+  const toggleOpen = async (sellerId, isOpen) => {
+    try {
+      const r = await apiPost("setSellerOpen", { token: adminToken, sellerId: sellerId, isOpen: isOpen });
+      if (r && r.success) {
+        showToast(isOpen ? "Seller OPEN" : "Seller CLOSED");
+        refreshAdmins && refreshAdmins();
+      } else showToast((r && r.error) || "Failed", "error");
+    } catch (e) {
+      showToast("Failed", "error");
+    }
+  };
+
+  const daily = async () => {
+    try {
+      const r = await apiGet("sendOwnerDailySummary");
+      showToast(r && r.success ? "Summary sent to Telegram" : "Failed", r && r.success ? "success" : "error");
+    } catch (e) {
+      showToast("Failed", "error");
+    }
+  };
+
+  const sellers = (admins || []).filter(a => String(a.Role || a.role || "").toLowerCase() === "seller");
+
+  return React.createElement("div", { style: { padding: 16 } },
+    React.createElement("h3", { className: "font-display", style: { marginBottom: 12 } }, "Owner Tools"),
+    React.createElement("div", { className: "card", style: { marginBottom: 16, padding: 14 } },
+      React.createElement("h4", { style: { marginBottom: 8 } }, "SMS settings"),
+      React.createElement("div", { style: { fontSize: 12, color: "var(--text-secondary)", marginBottom: 10 } }, "Customers get SMS when they order (if enabled). Use Africa's Talking, Twilio, or a webhook."),
+      ["smsEnabled", "smsProvider", "smsUsername", "smsApiKey", "smsFrom", "smsWebhookUrl"].map(k =>
+        React.createElement("div", { key: k, style: { marginBottom: 8 } },
+          React.createElement("label", { className: "text-sm font-semibold text-secondary" }, k),
+          React.createElement("input", {
+            className: "input",
+            value: sms[k] || "",
+            onChange: e => setSms(s => Object.assign({}, s, { [k]: e.target.value })),
+            placeholder: k === "smsEnabled" ? "true or false" : k === "smsProvider" ? "africastalking | twilio | webhook" : ""
+          })
+        )
+      ),
+      React.createElement("button", { className: "btn btn-primary btn-sm", disabled: busy, onClick: saveSms }, "Save SMS settings"),
+      React.createElement("div", { style: { display: "flex", gap: 8, marginTop: 10 } },
+        React.createElement("input", { className: "input", style: { flex: 1 }, placeholder: "Test phone 09...", value: testPhone, onChange: e => setTestPhone(e.target.value) }),
+        React.createElement("button", { className: "btn btn-secondary btn-sm", disabled: busy, onClick: testSms }, "Send test SMS")
+      )
+    ),
+    React.createElement("div", { className: "card", style: { marginBottom: 16, padding: 14 } },
+      React.createElement("h4", { style: { marginBottom: 8 } }, "Promo codes"),
+      React.createElement("div", { style: { display: "grid", gap: 8, gridTemplateColumns: "1fr 1fr" } },
+        React.createElement("input", { className: "input", placeholder: "CODE", value: promoForm.code, onChange: e => setPromoForm(f => Object.assign({}, f, { code: e.target.value })) }),
+        React.createElement("select", { className: "input", value: promoForm.type, onChange: e => setPromoForm(f => Object.assign({}, f, { type: e.target.value })) },
+          React.createElement("option", { value: "percent" }, "Percent %"),
+          React.createElement("option", { value: "fixed" }, "Fixed ETB")
+        ),
+        React.createElement("input", { className: "input", type: "number", placeholder: "Value", value: promoForm.value, onChange: e => setPromoForm(f => Object.assign({}, f, { value: e.target.value })) }),
+        React.createElement("input", { className: "input", type: "number", placeholder: "Min order", value: promoForm.minOrder, onChange: e => setPromoForm(f => Object.assign({}, f, { minOrder: e.target.value })) })
+      ),
+      React.createElement("button", { className: "btn btn-primary btn-sm", style: { marginTop: 8 }, disabled: busy, onClick: savePromo }, "Save promo"),
+      (promos || []).map((p, i) => React.createElement("div", { key: i, style: { fontSize: 13, marginTop: 6 } }, (p.code || p.Code) + " — " + (p.type || "") + " " + (p.value || "") + " (min " + (p.minOrder || 0) + ")"))
+    ),
+    React.createElement("div", { className: "card", style: { marginBottom: 16, padding: 14 } },
+      React.createElement("h4", { style: { marginBottom: 8 } }, "Sellers open / closed"),
+      sellers.map(s => {
+        const id = s.AdminID || s.adminId || s.id;
+        const open = String(s.isOpen || s.IsOpen || "TRUE").toUpperCase() !== "FALSE";
+        return React.createElement("div", { key: id, style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 } },
+          React.createElement("span", null, s.Name || s.name || id),
+          React.createElement("button", {
+            className: "btn btn-sm " + (open ? "btn-primary" : "btn-secondary"),
+            onClick: () => toggleOpen(id, !open)
+          }, open ? "OPEN — click to close" : "CLOSED — click to open")
+        );
+      })
+    ),
+    React.createElement("div", { className: "card", style: { marginBottom: 16, padding: 14 } },
+      React.createElement("h4", { style: { marginBottom: 8 } }, "Seller performance"),
+      (stats || []).length === 0 && React.createElement("div", { style: { fontSize: 13, color: "var(--text-secondary)" } }, "No sub-order data yet."),
+      (stats || []).map((st, i) => React.createElement("div", { key: i, style: { fontSize: 13, marginBottom: 6 } },
+        st.sellerId + ": total " + st.total + ", accepted " + st.accepted + ", rejected " + st.rejected + ", pending " + st.pending
+      ))
+    ),
+    React.createElement("button", { className: "btn btn-secondary", onClick: daily }, "Send daily summary to Telegram now")
+  );
 });
 const SellerDashboard = memo(({
   nav,
@@ -787,6 +963,19 @@ const SellerDashboard = memo(({
 }) => {
   const [tab, setTab] = useState("pending");
   const [handoverOTP, setHandoverOTP] = useState({});
+  const [shopOpen, setShopOpen] = useState(true);
+  const toggleShop = async () => {
+    try {
+      const next = !shopOpen;
+      const r = await apiPost("setSellerOpen", { token: adminToken, isOpen: next });
+      if (r && r.success) {
+        setShopOpen(next);
+        showToast(next ? "Your shop is OPEN" : "Your shop is CLOSED");
+      } else showToast((r && r.error) || "Failed", "error");
+    } catch (e) {
+      showToast("Failed", "error");
+    }
+  };
   const {
     pending,
     accepted,
@@ -855,7 +1044,11 @@ const SellerDashboard = memo(({
   }, React.createElement(BackBar, {
     onBack: nav.home,
     title: t("sellerDashboard")
-  }), React.createElement("div", {
+  }), React.createElement("button", {
+    className: "btn " + (shopOpen ? "btn-primary" : "btn-secondary"),
+    style: { width: "100%", marginBottom: 12, minHeight: 44 },
+    onClick: toggleShop
+  }, shopOpen ? "Shop is OPEN — tap to close" : "Shop is CLOSED — tap to open"), React.createElement("div", {
     className: "tab-bar scrollhide",
     style: {
       marginTop: 12
@@ -2036,7 +2229,8 @@ const OwnerProducts = memo(({
       ...p,
       price: String(p.price),
       stock: String(p.stock),
-      sellerId: p.sellerId || ""
+      sellerId: p.sellerId || "",
+      variants: typeof p.variants === "string" ? p.variants : (p.variants ? JSON.stringify(p.variants) : "")
     });
     setSuggestions(null);
     setSuggestQuery("");
@@ -2052,6 +2246,7 @@ const OwnerProducts = memo(({
       stock: "",
       description: "",
       image: "",
+      variants: JSON.stringify([{ name: "Size", choices: [{ label: "Medium", price: 0 }, { label: "Large", price: 0 }] }]),
       sellerId: ""
     });
     setSuggestions(null);
@@ -2190,7 +2385,66 @@ const OwnerProducts = memo(({
     style: {
       marginBottom: 12
     }
-  }, showAdd ? "Add Product" : "Edit Product"), React.createElement("div", {
+  }, showAdd ? "Add Product" : "Edit Product"),
+  React.createElement("div", {
+    style: {
+      marginTop: 8,
+      marginBottom: 14,
+      padding: 14,
+      borderRadius: 12,
+      border: "3px solid #22c55e",
+      background: "#052e16"
+    }
+  }, React.createElement("div", {
+    style: { fontSize: 16, fontWeight: 800, marginBottom: 6, color: "#4ade80" }
+  }, "1. Sizes & prices (tap + if needed)"), React.createElement("div", {
+    style: { fontSize: 12, color: "#86efac", marginBottom: 10 }
+  }, "Example: Medium 350, Standard 450, Large 550. Delete rows you do not need."), (typeof getSizeRowsFromVariants === "function" ? getSizeRowsFromVariants(form.variants) : []).map((row, idx) => React.createElement("div", {
+    key: idx,
+    style: { display: "flex", gap: 8, marginBottom: 8, alignItems: "center" }
+  }, React.createElement("input", {
+    className: "input",
+    style: { flex: 1.2 },
+    placeholder: "Size (Medium)",
+    value: row.label,
+    onChange: e => {
+      const rows = getSizeRowsFromVariants(form.variants);
+      rows[idx] = Object.assign({}, rows[idx], { label: e.target.value });
+      setForm(f => Object.assign({}, f, { variants: sizeRowsToVariants(rows) }));
+    }
+  }), React.createElement("input", {
+    className: "input",
+    type: "number",
+    style: { flex: 0.9, minWidth: 100 },
+    placeholder: "Price ETB",
+    value: row.price,
+    onChange: e => {
+      const rows = getSizeRowsFromVariants(form.variants);
+      rows[idx] = Object.assign({}, rows[idx], { price: e.target.value });
+      setForm(f => Object.assign({}, f, { variants: sizeRowsToVariants(rows) }));
+    }
+  }), React.createElement("button", {
+    type: "button",
+    className: "btn btn-ghost btn-sm",
+    style: { color: "#f87171", minWidth: 44, padding: "8px", fontWeight: 700 },
+    onClick: () => {
+      const rows = getSizeRowsFromVariants(form.variants).filter((_, i) => i !== idx);
+      setForm(f => Object.assign({}, f, { variants: sizeRowsToVariants(rows) }));
+    }
+  }, "X")), React.createElement("button", {
+    type: "button",
+    className: "btn btn-primary",
+    style: { width: "100%", marginTop: 6, minHeight: 44 },
+    onClick: () => {
+      const cur = typeof getSizeRowsFromVariants === "function" ? getSizeRowsFromVariants(form.variants || "") : [];
+      const n = cur.length;
+      const rows = cur.concat([{
+        label: n === 0 ? "Medium" : n === 1 ? "Standard" : n === 2 ? "Large" : ("Size " + (n + 1)),
+        price: form.price || "0"
+      }]);
+      setForm(f => Object.assign({}, f, { variants: sizeRowsToVariants(rows) }));
+    }
+  }, "+ Add another size")), React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
@@ -2227,7 +2481,7 @@ const OwnerProducts = memo(({
       price: e.target.value
     })),
     className: "input"
-  })), React.createElement("div", null, React.createElement("label", {
+  })),  React.createElement("div", null, React.createElement("label", {
     className: "text-sm font-semibold text-secondary"
   }, "Stock"), React.createElement("input", {
     type: "number",
@@ -2381,7 +2635,7 @@ const OwnerProducts = memo(({
     })),
     className: "input",
     rows: 2
-  })), React.createElement("div", {
+  })),  React.createElement("div", {
     style: {
       display: "flex",
       gap: 8,
@@ -3466,8 +3720,10 @@ const OwnerAdmins = memo(({
     role: "seller",
     categoryAccess: "",
     status: "active",
+    isOpen: true,
     telegramId: "",
     phone: "",
+    pickupName: "",
     pickupAddress: "",
     pickupPhone: "",
     vehicle: "",
@@ -3485,6 +3741,7 @@ const OwnerAdmins = memo(({
       status: "active",
       telegramId: "",
       phone: "",
+      pickupName: "",
       pickupAddress: "",
       pickupPhone: "",
       vehicle: "",
@@ -3704,6 +3961,16 @@ const OwnerAdmins = memo(({
     placeholder: "Numeric Telegram chat ID",
     className: "input"
   })), form.role === "seller" && React.createElement(React.Fragment, null, React.createElement("div", null, React.createElement("label", {
+    className: "text-sm font-semibold text-secondary"
+  }, "Pickup place name (for customers)"), React.createElement("input", {
+    value: form.pickupName || "",
+    onChange: e => setForm(f => ({
+      ...f,
+      pickupName: e.target.value
+    })),
+    className: "input",
+    placeholder: "e.g. Florida Cafe"
+  })), React.createElement("div", null, React.createElement("label", {
     className: "text-sm font-semibold text-secondary"
   }, "Pickup Address"), React.createElement("input", {
     value: form.pickupAddress,
