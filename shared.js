@@ -7,8 +7,7 @@ const {
   memo,
   useDeferredValue
 } = React;
-const API_URL =
-  "https://script.google.com/macros/s/AKfycbzb-swoKNZ7mTPG8_cxbVwNYpBS_n1SB9AXF6VKWwNvSE0m3UANbj5vWFJE5T_F0P2v/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzb-swoKNZ7mTPG8_cxbVwNYpBS_n1SB9AXF6VKWwNvSE0m3UANbj5vWFJE5T_F0P2v/exec";
 const CLOUDINARY_CLOUD_NAME = "fjw0er3b";
 const CLOUDINARY_UPLOAD_PRESET = "dessie_martuploads";
 const CLOUDINARY_BASE_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
@@ -182,16 +181,14 @@ async function uploadToCloudinary(file) {
   formData.append("file", compressed);
   formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
   formData.append("folder", "dessie_mart");
-  try {
-    const res = await fetch(CLOUDINARY_BASE_URL, {
-      method: "POST",
-      body: formData
-    });
-    const data = await res.json();
-    return data.secure_url || data.url || null
-  } catch (e) {
-    return null
-  }
+  const res = await fetch(CLOUDINARY_BASE_URL, {
+    method: "POST",
+    body: formData
+  });
+  const data = await res.json();
+  if (data.secure_url || data.url) return data.secure_url || data.url;
+  const msg = (data.error && (data.error.message || data.error)) || ("HTTP " + res.status);
+  throw new Error(String(msg));
 }
 async function smartUpload(file, preferCloudinary = true) {
   const cloudUrl = await uploadToCloudinary(file);
@@ -589,7 +586,61 @@ function normalizePhone(raw) {
 }
 
 function etb(n) {
-  return `${Number(n||0).toLocaleString()} ETB`
+  return `${Number(n||0).toLocaleString()}
+function parseVariants(p) {
+  try {
+    let v = p && p.variants;
+    if (!v) return [];
+    if (typeof v === "string") v = JSON.parse(v);
+    return Array.isArray(v) ? v : [];
+  } catch (e) {
+    return [];
+  }
+}
+function variantUnitPrice(product, selection) {
+  const groups = parseVariants(product);
+  if (!groups.length) return Number(product.price) || 0;
+  let price = Number(product.price) || 0;
+  for (const g of groups) {
+    const lab = selection && selection[g.name];
+    const ch = (g.choices || []).find(c => c.label === lab);
+    if (ch && ch.price != null && ch.price !== "") price = Number(ch.price);
+  }
+  return price;
+}
+function variantLabel(selection) {
+  if (!selection) return "";
+  return Object.keys(selection).map(k => k + ": " + selection[k]).join(", ");
+}
+ ETB`
+}
+
+
+function getSizeRowsFromVariants(variantsStr) {
+  try {
+    let v = variantsStr;
+    if (!v) return [];
+    if (typeof v === "string") v = JSON.parse(v);
+    if (!Array.isArray(v) || !v.length) return [];
+    const choices = v[0].choices || [];
+    return choices.map(c => ({
+      label: c.label || "",
+      price: c.price != null ? String(c.price) : ""
+    }));
+  } catch (e) {
+    return [];
+  }
+}
+function sizeRowsToVariants(rows) {
+  const choices = (rows || []).filter(r => String(r.label || "").trim()).map(r => ({
+    label: String(r.label).trim(),
+    price: Number(r.price) || 0
+  }));
+  if (!choices.length) return "";
+  return JSON.stringify([{
+    name: "Size",
+    choices: choices
+  }]);
 }
 
 function safeParse(s) {
@@ -3183,14 +3234,37 @@ const CheckoutView = memo(({
   const deliveryFee = fulfil === "pickup" ? 0 : (zone ? Number(zone.fee) || 0 : 0) + surcharge;
   const total = subtotal + deliveryFee;
   const payment = paymentMethods.find(m => m.id === paymentId);
-  const [pickupLocations, setPickupLocations] = useState([]);
+  const [allPickupLocations, setAllPickupLocations] = useState([]);
   const [pickupLocationId, setPickupLocationId] = useState("");
   useEffect(() => {
     loadPickupLocations().then(locs => {
-      setPickupLocations(locs);
-      if (locs && locs.length > 0) setPickupLocationId(locs[0].id)
+      setAllPickupLocations(locs || [])
     }).catch(() => {})
   }, []);
+  const cartSellerIds = useMemo(() => {
+    const ids = new Set();
+    items.forEach(c => {
+      const sid = c.product && (c.product.sellerId || c.product.sellerid);
+      if (sid) ids.add(String(sid).trim())
+    });
+    return Array.from(ids)
+  }, [items]);
+  const pickupLocations = useMemo(() => {
+    if (!allPickupLocations.length) return [];
+    if (!cartSellerIds.length) return allPickupLocations;
+    const matched = allPickupLocations.filter(l => {
+      const ls = String(l.sellerId || l.sellerid || "").trim();
+      if (!ls) return false;
+      return cartSellerIds.indexOf(ls) !== -1
+    });
+    if (matched.length) return matched;
+    return allPickupLocations.filter(l => !String(l.sellerId || l.sellerid || "").trim())
+  }, [allPickupLocations, cartSellerIds]);
+  useEffect(() => {
+    if (pickupLocations.length === 1) setPickupLocationId(pickupLocations[0].id);
+    else if (pickupLocations.length > 0 && !pickupLocations.find(l => l.id === pickupLocationId)) setPickupLocationId(pickupLocations[0].id);
+    else if (!pickupLocations.length) setPickupLocationId("")
+  }, [pickupLocations]);
   const loadCustomerInfo = useCallback(async pn => {
     if (!pn.trim()) return;
     try {
@@ -3221,18 +3295,22 @@ const CheckoutView = memo(({
         setError(t("enterAddress"));
         return
       }
+      if (fulfil === "pickup" && cartSellerIds.length > 1) {
+        setError("Pickup is only available when all items are from the same cafe/seller. Remove other items or choose delivery.");
+        return
+      }
       if (fulfil === "pickup" && !pickupLocationId) {
         setError("Please select a pickup location");
+        return
+      }
+      if (fulfil === "pickup" && pickupLocations.length === 0) {
+        setError("No pickup location for this cafe. Please choose delivery.");
         return
       }
       setStep(2)
     } else if (step === 2) {
       if (!name.trim() || !phone.trim()) {
         setError(t("enterNamePhone"));
-        return
-      }
-      if (!txnId.trim() || !senderAccount.trim()) {
-        setError(t("enterTxn"));
         return
       }
       setStep(3)
@@ -3262,9 +3340,8 @@ const CheckoutView = memo(({
         zoneName: fulfil === "delivery" ? zone ? zone.name : "" : "Pickup",
         zoneFee: fulfil === "delivery" ? zone ? Number(zone.fee) || 0 : 0 : 0,
         eta: fulfil === "delivery" ? zone ? zone.eta : "" : "Ready in 1\u20132 hrs",
-        address: fulfil === "delivery" ? address.trim() : pickupLocations.find(l => l.id ===
-          pickupLocationId)?.address || "Pickup location",
-        pickupLocationId: fulfil === "pickup" ? pickupLocationId : "",
+        address: fulfil === "delivery" ? address.trim() : (pickupLocations.length > 1 ? pickupLocations.map((l, i) => (i + 1) + ". " + (l.name || "") + " — " + (l.address || "")).join(" | ") : (pickupLocations.find(l => l.id === pickupLocationId) || pickupLocations[0] || {}).address || "Pickup location"),
+        pickupLocationId: fulfil === "pickup" ? (pickupLocations.length > 1 ? pickupLocations.map(l => l.id).join(",") : (pickupLocationId || (pickupLocations[0] && pickupLocations[0].id) || "")) : "",
         items: items.map(c => ({
           id: c.product.id,
           name: c.product.name,
@@ -3277,7 +3354,7 @@ const CheckoutView = memo(({
         deliveryFee,
         total,
         paymentMethod: payment ? payment.name : "",
-        txnId: txnId.trim(),
+        txnId: txnId.trim() || ("AUTO-" + Date.now().toString(36).toUpperCase()),
         senderAccount: senderAccount.trim(),
         paymentScreenshotUrl: su
       };
@@ -3466,7 +3543,54 @@ const CheckoutView = memo(({
         display: "block",
         marginBottom: 6
       }
-    }, "Pickup Location"), React.createElement("select", {
+    }, "Pickup Location"), pickupLocations.length > 1 ? React.createElement("div", {
+      style: {
+        padding: 12,
+        borderRadius: 12,
+        border: "1.5px solid var(--border)",
+        background: "var(--bg-secondary)"
+      }
+    }, React.createElement("div", {
+      style: {
+        fontSize: 13,
+        fontWeight: 700,
+        marginBottom: 8
+      }
+    }, "You will pick up from " + pickupLocations.length + " places:"), pickupLocations.map((loc, i) => React.createElement("div", {
+      key: loc.id,
+      style: {
+        fontSize: 13,
+        marginBottom: 6,
+        lineHeight: 1.4
+      }
+    }, React.createElement("strong", null, (i + 1) + ". " + (loc.name || "Location")), React.createElement("div", {
+      style: {
+        color: "var(--text-secondary)",
+        fontSize: 12
+      }
+    }, loc.address || ""))), React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: "var(--text-tertiary)",
+        marginTop: 8
+      }
+    }, "Each cafe prepares its own items. Collect from every location listed.")) : pickupLocations.length === 1 ? React.createElement("div", {
+      style: {
+        padding: 12,
+        borderRadius: 12,
+        border: "1.5px solid var(--border)",
+        background: "var(--bg-secondary)"
+      }
+    }, React.createElement("div", {
+      style: {
+        fontWeight: 700
+      }
+    }, pickupLocations[0].name), React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: "var(--text-secondary)"
+      }
+    }, pickupLocations[0].address || "")) : React.createElement("select", {
       value: pickupLocationId,
       onChange: e => setPickupLocationId(e.target.value),
       className: "input"
@@ -3661,18 +3785,6 @@ const CheckoutView = memo(({
       textAlign: "center"
     }
   }, t("tapToCopy")), React.createElement("label", {
-    className: "text-sm font-semibold text-secondary",
-    style: {
-      display: "block",
-      marginTop: 16,
-      marginBottom: 6
-    }
-  }, t("transactionId")), React.createElement("input", {
-    value: txnId,
-    onChange: e => setTxnId(e.target.value),
-    placeholder: "e.g. FT25196XXXXX",
-    className: "input"
-  }), React.createElement("label", {
     className: "text-sm font-semibold text-secondary",
     style: {
       display: "block",
@@ -5018,7 +5130,7 @@ const AdminView = memo(({
         showToast(`Logged in as ${r.role}`)
       } else setLoginError("Invalid username or password.")
     } catch (e) {
-      setLoginError("Couldn't reach the server.")
+      setLoginError((e&&e.message)?("Server: "+e.message):"Couldn't reach the server.")
     }
     setLoggingIn(false)
   }
@@ -6397,6 +6509,7 @@ const OwnerProducts = memo(({
       stock: "",
       description: "",
       image: "",
+      variants: "",
       sellerId: ""
     });
     setSuggestions(null);
@@ -6573,7 +6686,65 @@ const OwnerProducts = memo(({
       price: e.target.value
     })),
     className: "input"
-  })), React.createElement("div", null, React.createElement("label", {
+  })), React.createElement("div", {
+    style: {
+      marginTop: 14,
+      marginBottom: 10,
+      padding: 12,
+      borderRadius: 12,
+      border: "2px solid var(--brand-green)",
+      background: "var(--bg-secondary)"
+    }
+  }, React.createElement("div", {
+    style: { fontSize: 15, fontWeight: 800, marginBottom: 4, color: "var(--brand-green)" }
+  }, "Sizes & different prices"), React.createElement("div", {
+    style: { fontSize: 12, color: "var(--text-tertiary)", marginBottom: 10 }
+  }, "Optional. Tap + Add size. Example: Medium 350, Large 550."), (typeof getSizeRowsFromVariants === "function" ? getSizeRowsFromVariants(form.variants) : []).map((row, idx) => React.createElement("div", {
+    key: idx,
+    style: { display: "flex", gap: 8, marginBottom: 8, alignItems: "center" }
+  }, React.createElement("input", {
+    className: "input",
+    style: { flex: 1.2 },
+    placeholder: "e.g. Medium",
+    value: row.label,
+    onChange: e => {
+      const rows = getSizeRowsFromVariants(form.variants);
+      rows[idx] = Object.assign({}, rows[idx], { label: e.target.value });
+      setForm(f => Object.assign({}, f, { variants: sizeRowsToVariants(rows) }));
+    }
+  }), React.createElement("input", {
+    className: "input",
+    type: "number",
+    style: { flex: 0.8, minWidth: 90 },
+    placeholder: "Price",
+    value: row.price,
+    onChange: e => {
+      const rows = getSizeRowsFromVariants(form.variants);
+      rows[idx] = Object.assign({}, rows[idx], { price: e.target.value });
+      setForm(f => Object.assign({}, f, { variants: sizeRowsToVariants(rows) }));
+    }
+  }), React.createElement("button", {
+    type: "button",
+    className: "btn btn-ghost btn-sm",
+    style: { color: "var(--danger)", minWidth: 40, padding: "8px" },
+    onClick: () => {
+      const rows = getSizeRowsFromVariants(form.variants).filter((_, i) => i !== idx);
+      setForm(f => Object.assign({}, f, { variants: sizeRowsToVariants(rows) }));
+    }
+  }, "X")), React.createElement("button", {
+    type: "button",
+    className: "btn btn-primary btn-sm",
+    style: { width: "100%", marginTop: 4 },
+    onClick: () => {
+      const cur = typeof getSizeRowsFromVariants === "function" ? getSizeRowsFromVariants(form.variants || "") : [];
+      const n = cur.length;
+      const rows = cur.concat([{
+        label: n === 0 ? "Medium" : n === 1 ? "Large" : ("Size " + (n + 1)),
+        price: form.price || "0"
+      }]);
+      setForm(f => Object.assign({}, f, { variants: sizeRowsToVariants(rows) }));
+    }
+  }, "+ Add size")), React.createElement("div", null, React.createElement("label", {
     className: "text-sm font-semibold text-secondary"
   }, "Stock"), React.createElement("input", {
     type: "number",
@@ -6730,6 +6901,98 @@ const OwnerProducts = memo(({
     className: "input",
     rows: 2
   })), React.createElement("div", {
+    style: {
+      marginTop: 14,
+      padding: 12,
+      borderRadius: 12,
+      border: "1px solid var(--border)",
+      background: "var(--bg-secondary)"
+    }
+  }, React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 700,
+      marginBottom: 6
+    }
+  }, "Sizes & prices (optional)"), React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "var(--text-tertiary)",
+      marginBottom: 10
+    }
+  }, "Add Medium, Large, etc. Customer picks one; that price is used."), (getSizeRowsFromVariants(form.variants) || []).map((row, idx) => React.createElement("div", {
+    key: idx,
+    style: {
+      display: "flex",
+      gap: 8,
+      marginBottom: 8,
+      alignItems: "center"
+    }
+  }, React.createElement("input", {
+    className: "input",
+    style: {
+      flex: 1.2
+    },
+    placeholder: "Size name (e.g. Medium)",
+    value: row.label,
+    onChange: e => {
+      const rows = getSizeRowsFromVariants(form.variants);
+      rows[idx] = Object.assign({}, rows[idx], {
+        label: e.target.value
+      });
+      setForm(f => Object.assign({}, f, {
+        variants: sizeRowsToVariants(rows)
+      }));
+    }
+  }), React.createElement("input", {
+    className: "input",
+    type: "number",
+    style: {
+      flex: 0.8,
+      minWidth: 90
+    },
+    placeholder: "Price",
+    value: row.price,
+    onChange: e => {
+      const rows = getSizeRowsFromVariants(form.variants);
+      rows[idx] = Object.assign({}, rows[idx], {
+        price: e.target.value
+      });
+      setForm(f => Object.assign({}, f, {
+        variants: sizeRowsToVariants(rows)
+      }));
+    }
+  }), React.createElement("button", {
+    type: "button",
+    className: "btn btn-ghost btn-sm",
+    style: {
+      color: "var(--danger)",
+      minWidth: 40,
+      padding: "8px"
+    },
+    onClick: () => {
+      const rows = getSizeRowsFromVariants(form.variants).filter((_, i) => i !== idx);
+      setForm(f => Object.assign({}, f, {
+        variants: sizeRowsToVariants(rows)
+      }));
+    }
+  }, "X")), React.createElement("button", {
+    type: "button",
+    className: "btn btn-secondary btn-sm",
+    style: {
+      width: "100%",
+      marginTop: 4
+    },
+    onClick: () => {
+      const rows = getSizeRowsFromVariants(form.variants).concat([{
+        label: "Size " + (getSizeRowsFromVariants(form.variants).length + 1),
+        price: form.price || "0"
+      }]);
+      setForm(f => Object.assign({}, f, {
+        variants: sizeRowsToVariants(rows)
+      }));
+    }
+  }, "+ Add size")), React.createElement("div", {
     style: {
       display: "flex",
       gap: 8,
@@ -7790,6 +8053,7 @@ const OwnerAdmins = memo(({
     status: "active",
     telegramId: "",
     phone: "",
+    pickupName: "",
     pickupAddress: "",
     pickupPhone: "",
     vehicle: "",
@@ -7806,6 +8070,7 @@ const OwnerAdmins = memo(({
       status: "active",
       telegramId: "",
       phone: "",
+      pickupName: "",
       pickupAddress: "",
       pickupPhone: "",
       vehicle: "",
@@ -8004,6 +8269,16 @@ const OwnerAdmins = memo(({
     className: "input"
   })), form.role === "seller" && React.createElement(React.Fragment, null, React.createElement(
     "div", null, React.createElement("label", {
+      className: "text-sm font-semibold text-secondary"
+    }, "Pickup place name (for customers)"), React.createElement("input", {
+      value: form.pickupName || "",
+      onChange: e => setForm(f => ({
+        ...f,
+        pickupName: e.target.value
+      })),
+      className: "input",
+      placeholder: "e.g. Florida Cafe"
+    })), React.createElement("div", null, React.createElement("label", {
       className: "text-sm font-semibold text-secondary"
     }, "Pickup Address"), React.createElement("input", {
       value: form.pickupAddress,
