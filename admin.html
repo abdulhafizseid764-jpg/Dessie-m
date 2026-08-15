@@ -1059,6 +1059,24 @@ function getLang() {
   try { return localStorage.getItem("lang") || "en"; } catch (e) { return "en"; }
 }
 
+
+function timeAgo(iso) {
+  if (!iso) return "";
+  var diff = Date.now() - new Date(iso).getTime();
+  var mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return mins + "m ago";
+  var hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + "h ago";
+  return Math.floor(hrs / 24) + "d ago";
+}
+function safeParse(v, fallback) {
+  if (fallback === undefined) fallback = null;
+  if (v == null || v === "") return fallback;
+  if (typeof v === "object") return v;
+  try { return JSON.parse(v); } catch (e) { return fallback; }
+}
+
 function getSizeRowsFromVariants(variantsStr) {
   try {
     let v = variantsStr;
