@@ -209,7 +209,7 @@ window.onerror = function(e,s,l,c) {
 <div id="root"></div>
 
 <!-- Shared code -->
-<script src="shared.js?v=globals3"></script>
+<script src="shared.js?v=fix5"></script>
 
 <!-- Admin App -->
 <script>
@@ -221,6 +221,36 @@ const {
   useCallback,
   memo
 } = React;
+
+// Safe globals from shared.js (never crash if something is missing)
+function getTheme() {
+  try {
+    if (typeof window.__dmGetTheme === "function") return window.__dmGetTheme();
+    var t = localStorage.getItem("theme") || localStorage.getItem("dm_theme") || "light";
+    return t === "dark" ? "dark" : "light";
+  } catch (e) { return "light"; }
+}
+function setTheme(t) {
+  try {
+    if (typeof window.__dmSetTheme === "function") return window.__dmSetTheme(t);
+    localStorage.setItem("theme", t);
+    document.documentElement.setAttribute("data-theme", t === "dark" ? "dark" : "light");
+  } catch (e) {}
+}
+var Icon = window.Icon || function IconFallback() { return null; };
+var ToastProvider = window.ToastProvider || function ToastFallback(props) { return props.children || null; };
+var useToast = window.useToast || function () { return function () {}; };
+var apiGet = window.apiGet || async function () { return null; };
+var apiPost = window.apiPost || async function () { return null; };
+var apiUploadFile = window.apiUploadFile;
+var etb = window.etb || function (n) { return (Number(n) || 0).toLocaleString() + " ETB"; };
+var formatDate = window.formatDate || function (d) { try { return new Date(d).toLocaleString(); } catch (e) { return String(d || ""); } };
+var normalizePhone = window.normalizePhone || function (p) { return String(p || "").replace(/\s/g, ""); };
+var smartUpload = window.smartUpload;
+var loadPickupLocations = window.loadPickupLocations || async function () { return []; };
+if (window.ORDER_STATUSES) var ORDER_STATUSES = window.ORDER_STATUSES;
+if (window.PAYMENT_STATUSES) var PAYMENT_STATUSES = window.PAYMENT_STATUSES;
+if (window.TRANSLATIONS) var TRANSLATIONS = window.TRANSLATIONS;
 
 function getSizeRowsFromVariants(variantsStr) {
   try {
