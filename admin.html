@@ -209,7 +209,7 @@ window.onerror = function(e,s,l,c) {
 <div id="root"></div>
 
 <!-- Shared code -->
-<script src="shared.js?v=fix5"></script>
+<script src="shared.js?v=fix6"></script>
 
 <!-- Admin App -->
 <script>
@@ -240,6 +240,10 @@ function setTheme(t) {
 var Icon = window.Icon || function IconFallback() { return null; };
 var ToastProvider = window.ToastProvider || function ToastFallback(props) { return props.children || null; };
 var useToast = window.useToast || function () { return function () {}; };
+var DEFAULT_MEDIUM_SURCHARGE = window.DEFAULT_MEDIUM_SURCHARGE != null ? window.DEFAULT_MEDIUM_SURCHARGE : 50;
+var DEFAULT_HEAVY_SURCHARGE = window.DEFAULT_HEAVY_SURCHARGE != null ? window.DEFAULT_HEAVY_SURCHARGE : 100;
+var DEFAULT_DELIVERY_ZONES = window.DEFAULT_DELIVERY_ZONES || [];
+var DEFAULT_PAYMENT_METHODS = window.DEFAULT_PAYMENT_METHODS || [];
 var apiGet = window.apiGet || async function () { return null; };
 var apiPost = window.apiPost || async function () { return null; };
 var apiUploadFile = window.apiUploadFile;
