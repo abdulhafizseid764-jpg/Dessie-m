@@ -209,6 +209,14 @@ window.onerror = function(e,s,l,c) {
 
 <!-- Admin App -->
 <script>
+const {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+  memo
+} = React;
 
 function getSizeRowsFromVariants(variantsStr) {
   try {
