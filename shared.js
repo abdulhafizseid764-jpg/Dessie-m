@@ -1475,6 +1475,7 @@ function fmt(s, v) {
 }
 
 function getTheme() {
+  // available to admin.html
   try {
     return localStorage.getItem("dm_theme") || "light"
   } catch {
@@ -8692,8 +8693,8 @@ try {
   if (typeof setLang !== "undefined") window.setLang = setLang;
   if (typeof useT !== "undefined") window.useT = useT;
   if (typeof fmt !== "undefined") window.fmt = fmt;
-  if (typeof getTheme !== "undefined") window.getTheme = getTheme;
-  if (typeof setTheme !== "undefined") window.setTheme = setTheme;
+  if (typeof getTheme !== "undefined") { window.getTheme = getTheme; window.__dmGetTheme = getTheme; }
+  if (typeof setTheme !== "undefined") { window.setTheme = setTheme; window.__dmSetTheme = setTheme; }
   if (typeof viewToHash !== "undefined") window.viewToHash = viewToHash;
   if (typeof hashToView !== "undefined") window.hashToView = hashToView;
   if (typeof ToastProvider !== "undefined") window.ToastProvider = ToastProvider;
@@ -8763,3 +8764,5 @@ try {
   if (typeof DeliveryOrderCard !== "undefined") window.DeliveryOrderCard = DeliveryOrderCard;
   if (typeof DeliveryOrderList !== "undefined") window.DeliveryOrderList = DeliveryOrderList;
 } catch (e) { console.warn("shared window export", e); }
+
+try { window.getTheme = getTheme; window.setTheme = setTheme; window.__dmGetTheme = getTheme; window.__dmSetTheme = setTheme; } catch(e) {}
