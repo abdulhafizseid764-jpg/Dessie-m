@@ -199,7 +199,11 @@ select.input { cursor: pointer; appearance: none; background-image: url("data:im
 <body>
 <script>
 window.onerror = function(e,s,l,c) {
-  document.body.innerHTML = '<div style="padding:40px;color:#DC2626;font-family:monospace;white-space:pre-wrap;font-size:14px;line-height:1.6"><h2 style="margin:0 0 12px">Runtime Error</h2>' + e + '<br>Line: ' + l + ', Col: ' + c + '</div>';
+  console.error(e, s, l, c);
+  var root = document.getElementById("root");
+  var msg = '<div style="padding:40px;color:#DC2626;font-family:monospace;white-space:pre-wrap;font-size:14px;line-height:1.6"><h2 style="margin:0 0 12px">Runtime Error</h2>' + e + '<br>Line: ' + l + ', Col: ' + c + '</div>';
+  if (root) root.innerHTML = msg; else document.body.innerHTML = msg;
+  return true;
 };
 </script>
 <div id="root"></div>
@@ -4480,7 +4484,19 @@ const StatusBadge = memo(({
     size: 12
   }), " ", status);
 });
-ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(ToastProvider, null, React.createElement(AdminApp, null)));
+(function(){
+  function mountAdmin(){
+    var el = document.getElementById("root");
+    if (!el) { console.error("No #root"); return; }
+    var App = React.createElement(AdminApp, null);
+    if (typeof ToastProvider !== "undefined") {
+      App = React.createElement(ToastProvider, null, App);
+    }
+    ReactDOM.createRoot(el).render(App);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mountAdmin);
+  else mountAdmin();
+})();
 </script>
 </body>
 </html>
