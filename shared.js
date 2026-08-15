@@ -8640,3 +8640,22 @@ const OwnerZones = memo(({
     size: 14
   }))))))
 });
+
+
+// Expose to other classic scripts (admin.html)
+try {
+  window.Icon = Icon;
+  window.ToastProvider = typeof ToastProvider !== "undefined" ? ToastProvider : window.ToastProvider;
+  if (typeof useToast !== "undefined") window.useToast = useToast;
+  window.apiGet = apiGet;
+  window.apiPost = apiPost;
+  if (typeof apiUploadFile !== "undefined") window.apiUploadFile = apiUploadFile;
+  if (typeof etb !== "undefined") window.etb = etb;
+  if (typeof normalizePhone !== "undefined") window.normalizePhone = normalizePhone;
+  if (typeof formatDate !== "undefined") window.formatDate = formatDate;
+  if (typeof smartUpload !== "undefined") window.smartUpload = smartUpload;
+  if (typeof loadPickupLocations !== "undefined") window.loadPickupLocations = loadPickupLocations;
+  if (typeof getSizeRowsFromVariants !== "undefined") window.getSizeRowsFromVariants = getSizeRowsFromVariants;
+  if (typeof sizeRowsToVariants !== "undefined") window.sizeRowsToVariants = sizeRowsToVariants;
+  if (typeof API_URL !== "undefined") window.API_URL = API_URL;
+} catch (e) { console.warn("shared exports", e); }
