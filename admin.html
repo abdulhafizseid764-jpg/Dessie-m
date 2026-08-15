@@ -207,54 +207,110 @@ window.onerror = function(e,s,l,c) {
 };
 </script>
 <div id="root"></div>
-
-<!-- Shared code -->
-<script src="shared.js?v=fix6"></script>
-
-<!-- Admin App -->
+<!-- Admin App (standalone) -->
 <script>
-const {
-  useState,
-  useEffect,
-  useMemo,
-  useRef,
-  useCallback,
-  memo
-} = React;
 
-// Safe globals from shared.js (never crash if something is missing)
+// ===== Standalone admin bootstrap (no shared.js — avoids name collisions) =====
+var useState = React.useState;
+var useEffect = React.useEffect;
+var useMemo = React.useMemo;
+var useRef = React.useRef;
+var useCallback = React.useCallback;
+var memo = React.memo;
+
+var API_URL = "https://script.google.com/macros/s/AKfycbzb-swoKNZ7mTPG8_cxbVwNYpBS_n1SB9AXF6VKWwNvSE0m3UANbj5vWFJE5T_F0P2v/exec";
+var DEFAULT_MEDIUM_SURCHARGE = 50;
+var DEFAULT_HEAVY_SURCHARGE = 100;
+var DEFAULT_DELIVERY_ZONES = [];
+var DEFAULT_PAYMENT_METHODS = [];
+
 function getTheme() {
   try {
-    if (typeof window.__dmGetTheme === "function") return window.__dmGetTheme();
-    var t = localStorage.getItem("theme") || localStorage.getItem("dm_theme") || "light";
+    var t = localStorage.getItem("theme") || "light";
     return t === "dark" ? "dark" : "light";
   } catch (e) { return "light"; }
 }
 function setTheme(t) {
   try {
-    if (typeof window.__dmSetTheme === "function") return window.__dmSetTheme(t);
     localStorage.setItem("theme", t);
     document.documentElement.setAttribute("data-theme", t === "dark" ? "dark" : "light");
   } catch (e) {}
 }
-var Icon = window.Icon || function IconFallback() { return null; };
-var ToastProvider = window.ToastProvider || function ToastFallback(props) { return props.children || null; };
-var useToast = window.useToast || function () { return function () {}; };
-var DEFAULT_MEDIUM_SURCHARGE = window.DEFAULT_MEDIUM_SURCHARGE != null ? window.DEFAULT_MEDIUM_SURCHARGE : 50;
-var DEFAULT_HEAVY_SURCHARGE = window.DEFAULT_HEAVY_SURCHARGE != null ? window.DEFAULT_HEAVY_SURCHARGE : 100;
-var DEFAULT_DELIVERY_ZONES = window.DEFAULT_DELIVERY_ZONES || [];
-var DEFAULT_PAYMENT_METHODS = window.DEFAULT_PAYMENT_METHODS || [];
-var apiGet = window.apiGet || async function () { return null; };
-var apiPost = window.apiPost || async function () { return null; };
-var apiUploadFile = window.apiUploadFile;
-var etb = window.etb || function (n) { return (Number(n) || 0).toLocaleString() + " ETB"; };
-var formatDate = window.formatDate || function (d) { try { return new Date(d).toLocaleString(); } catch (e) { return String(d || ""); } };
-var normalizePhone = window.normalizePhone || function (p) { return String(p || "").replace(/\s/g, ""); };
-var smartUpload = window.smartUpload;
-var loadPickupLocations = window.loadPickupLocations || async function () { return []; };
-if (window.ORDER_STATUSES) var ORDER_STATUSES = window.ORDER_STATUSES;
-if (window.PAYMENT_STATUSES) var PAYMENT_STATUSES = window.PAYMENT_STATUSES;
-if (window.TRANSLATIONS) var TRANSLATIONS = window.TRANSLATIONS;
+
+function etb(n) {
+  return (Number(n) || 0).toLocaleString() + " ETB";
+}
+function formatDate(d) {
+  try { return new Date(d).toLocaleString(); } catch (e) { return String(d || ""); }
+}
+function normalizePhone(p) {
+  return String(p || "").replace(/\s/g, "");
+}
+
+async function apiGet(action, params) {
+  params = params || {};
+  var q = Object.keys(params).map(function(k) {
+    return encodeURIComponent(k) + "=" + encodeURIComponent(params[k] == null ? "" : params[k]);
+  }).join("&");
+  var url = API_URL + "?action=" + encodeURIComponent(action) + (q ? "&" + q : "");
+  var controller = new AbortController();
+  var timer = setTimeout(function() { controller.abort(); }, 45000);
+  try {
+    var res = await fetch(url, { cache: "no-store", signal: controller.signal });
+    clearTimeout(timer);
+    var text = await res.text();
+    try { return JSON.parse(text); } catch (e) { return { success: false, error: "Invalid server response" }; }
+  } catch (e) {
+    clearTimeout(timer);
+    return { success: false, error: e.message || "Network error" };
+  }
+}
+
+async function apiPost(action, body) {
+  body = body || {};
+  body.action = action;
+  var controller = new AbortController();
+  var timer = setTimeout(function() { controller.abort(); }, 60000);
+  try {
+    var res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(body),
+      signal: controller.signal
+    });
+    clearTimeout(timer);
+    var text = await res.text();
+    try { return JSON.parse(text); } catch (e) { return { success: false, error: "Invalid server response" }; }
+  } catch (e) {
+    clearTimeout(timer);
+    return { success: false, error: e.message || "Network error" };
+  }
+}
+
+// Minimal icon component (no dependency on shared Icon map)
+var Icon = function Icon(props) {
+  var name = props.name || "";
+  var size = props.size || 18;
+  return React.createElement("span", {
+    style: {
+      display: "inline-flex",
+      width: size,
+      height: size,
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: Math.max(10, size - 4),
+      lineHeight: 1
+    },
+    title: name
+  }, name.slice(0, 1));
+};
+
+function ToastProvider(props) {
+  return props.children || null;
+}
+function useToast() {
+  return function(msg) { try { console.log(msg); } catch (e) {} };
+}
 
 function getSizeRowsFromVariants(variantsStr) {
   try {
