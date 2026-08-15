@@ -1,16 +1,15 @@
-const {
-  useState,
-  useEffect,
-  useMemo,
-  useRef,
-  useCallback,
-  memo,
-  useDeferredValue
-} = React;
-const API_URL = "https://script.google.com/macros/s/AKfycbzb-swoKNZ7mTPG8_cxbVwNYpBS_n1SB9AXF6VKWwNvSE0m3UANbj5vWFJE5T_F0P2v/exec";
-const CLOUDINARY_CLOUD_NAME = "fjw0er3b";
-const CLOUDINARY_UPLOAD_PRESET = "dessie_martuploads";
-const CLOUDINARY_BASE_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+// var so other classic scripts (admin.html) can share these names
+var useState = React.useState;
+var useEffect = React.useEffect;
+var useMemo = React.useMemo;
+var useRef = React.useRef;
+var useCallback = React.useCallback;
+var memo = React.memo;
+var useDeferredValue = React.useDeferredValue;
+var API_URL = "https://script.google.com/macros/s/AKfycbzb-swoKNZ7mTPG8_cxbVwNYpBS_n1SB9AXF6VKWwNvSE0m3UANbj5vWFJE5T_F0P2v/exec";
+var CLOUDINARY_CLOUD_NAME = "fjw0er3b";
+var CLOUDINARY_UPLOAD_PRESET = "dessie_martuploads";
+var CLOUDINARY_BASE_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
 const _pendingRequests = new Map;
 const _requestTimeouts = new Map;
 
@@ -484,7 +483,7 @@ function useLazyImage(src) {
     imgRef
   }
 }
-const EMOJI = {
+var EMOJI = {
   ShoppingCart: "\uD83D\uDED2",
   Search: "\uD83D\uDD0D",
   X: "\u2715",
@@ -540,7 +539,7 @@ const EMOJI = {
   Award: "\uD83C\uDFC6",
   Zap: "\u26A1"
 };
-const Icon = memo(({
+var Icon = memo(({
   name,
   size = 18,
   className = ""
@@ -673,7 +672,7 @@ function timeAgo(iso) {
   if (hrs < 24) return `${hrs}h ago`;
   return `${Math.floor(hrs/24)}d ago`
 }
-const DEFAULT_DELIVERY_ZONES = [{
+var DEFAULT_DELIVERY_ZONES = [{
   id: "piassa",
   name: "Piassa",
   fee: 100,
@@ -704,10 +703,10 @@ const DEFAULT_DELIVERY_ZONES = [{
   fee: 100,
   eta: "30 min \u2013 1 hr"
 }];
-const DEFAULT_MEDIUM_SURCHARGE = 50;
-const DEFAULT_HEAVY_SURCHARGE = 100;
-const PICKUP_LOCATION = "Piassa \u2013 Family Supermarket";
-const DEFAULT_PAYMENT_METHODS = [{
+var DEFAULT_MEDIUM_SURCHARGE = 50;
+var DEFAULT_HEAVY_SURCHARGE = 100;
+var PICKUP_LOCATION = "Piassa \u2013 Family Supermarket";
+var DEFAULT_PAYMENT_METHODS = [{
   id: "cbe",
   name: "CBE",
   account: "1000771527148",
@@ -728,7 +727,7 @@ const DEFAULT_PAYMENT_METHODS = [{
   account: "0714878079",
   note: "Mobile money"
 }];
-const CONTACT = {
+var CONTACT = {
   phone: "+251989610229",
   telegram: "https://t.me/+251989610229",
   instagram: "https://www.instagram.com/dessiemart?igsh=MWFsb21pdHp0ejcwdQ==",
@@ -736,14 +735,14 @@ const CONTACT = {
   whatsapp: "https://wa.me/251989610229",
   tiktok: "https://www.tiktok.com/@dessiemart?_r=1&_t=ZS-98EmkISwR5r"
 };
-const ORDER_STATUSES = ["Pending Payment Verification", "Pending Seller Approval", "Accepted by Seller",
+var ORDER_STATUSES = ["Pending Payment Verification", "Pending Seller Approval", "Accepted by Seller",
   "Driver Assigned", "Ready for Pickup", "Out for Delivery", "Delivered", "Rejected"
 ];
-const PAYMENT_STATUSES = ["Pending", "Completed", "Rejected"];
-const SUPPORT_CATEGORIES = ["Unsuccessful Payment", "Unsuccessful Delivery", "Order Not Found",
+var PAYMENT_STATUSES = ["Pending", "Completed", "Rejected"];
+var SUPPORT_CATEGORIES = ["Unsuccessful Payment", "Unsuccessful Delivery", "Order Not Found",
   "Product Issue", "Other"
 ];
-const TRANSLATIONS = {
+var TRANSLATIONS = {
   en: {
     tagline1: "Shop Everything You Need",
     tagline2: "in Dessie",
@@ -8642,127 +8641,31 @@ const OwnerZones = memo(({
   }))))))
 });
 
-// Expose shared bindings to admin.html (classic script globals)
+// === Globals for admin.html (classic multi-script page) ===
 try {
-  if (typeof apiGet !== "undefined") window.apiGet = apiGet;
-  if (typeof apiPost !== "undefined") window.apiPost = apiPost;
-  if (typeof cacheGet !== "undefined") window.cacheGet = cacheGet;
-  if (typeof cacheSet !== "undefined") window.cacheSet = cacheSet;
-  if (typeof cacheClear !== "undefined") window.cacheClear = cacheClear;
-  if (typeof compressImage !== "undefined") window.compressImage = compressImage;
+  window.Icon = Icon;
+  window.ToastProvider = ToastProvider;
+  window.useToast = useToast;
+  window.apiGet = apiGet;
+  window.apiPost = apiPost;
   if (typeof apiUploadFile !== "undefined") window.apiUploadFile = apiUploadFile;
-  if (typeof uploadToCloudinary !== "undefined") window.uploadToCloudinary = uploadToCloudinary;
+  window.etb = etb;
+  window.formatDate = formatDate;
+  window.normalizePhone = normalizePhone;
   if (typeof smartUpload !== "undefined") window.smartUpload = smartUpload;
-  if (typeof normalizeImageUrl !== "undefined") window.normalizeImageUrl = normalizeImageUrl;
-  if (typeof isCloudinaryUrl !== "undefined") window.isCloudinaryUrl = isCloudinaryUrl;
-  if (typeof getCloudinaryUrl !== "undefined") window.getCloudinaryUrl = getCloudinaryUrl;
-  if (typeof loadProducts !== "undefined") window.loadProducts = loadProducts;
-  if (typeof loadCategories !== "undefined") window.loadCategories = loadCategories;
-  if (typeof loadSettings !== "undefined") window.loadSettings = loadSettings;
-  if (typeof loadDeliveryZones !== "undefined") window.loadDeliveryZones = loadDeliveryZones;
-  if (typeof loadAdmins !== "undefined") window.loadAdmins = loadAdmins;
-  if (typeof loadOrders !== "undefined") window.loadOrders = loadOrders;
-  if (typeof loadTickets !== "undefined") window.loadTickets = loadTickets;
   if (typeof loadPickupLocations !== "undefined") window.loadPickupLocations = loadPickupLocations;
-  if (typeof loadTicketMessages !== "undefined") window.loadTicketMessages = loadTicketMessages;
-  if (typeof trackOrderByPhone !== "undefined") window.trackOrderByPhone = trackOrderByPhone;
-  if (typeof findTicketsByPhone !== "undefined") window.findTicketsByPhone = findTicketsByPhone;
-  if (typeof groupItemsBySeller !== "undefined") window.groupItemsBySeller = groupItemsBySeller;
-  if (typeof calculateSurcharge !== "undefined") window.calculateSurcharge = calculateSurcharge;
-  if (typeof calculateDeliveryFee !== "undefined") window.calculateDeliveryFee = calculateDeliveryFee;
-  if (typeof calculateOrderTotals !== "undefined") window.calculateOrderTotals = calculateOrderTotals;
-  if (typeof isPickupOrder !== "undefined") window.isPickupOrder = isPickupOrder;
-  if (typeof isDeliveryOrder !== "undefined") window.isDeliveryOrder = isDeliveryOrder;
-  if (typeof usePaginatedData !== "undefined") window.usePaginatedData = usePaginatedData;
-  if (typeof useLazyImage !== "undefined") window.useLazyImage = useLazyImage;
-  if (typeof getChildren !== "undefined") window.getChildren = getChildren;
-  if (typeof flattenCategoryOptions !== "undefined") window.flattenCategoryOptions = flattenCategoryOptions;
-  if (typeof getDescendantIds !== "undefined") window.getDescendantIds = getDescendantIds;
-  if (typeof countProductsInCategory !== "undefined") window.countProductsInCategory = countProductsInCategory;
-  if (typeof normalizePhone !== "undefined") window.normalizePhone = normalizePhone;
-  if (typeof etb !== "undefined") window.etb = etb;
-  if (typeof parseVariants !== "undefined") window.parseVariants = parseVariants;
-  if (typeof variantUnitPrice !== "undefined") window.variantUnitPrice = variantUnitPrice;
-  if (typeof variantLabel !== "undefined") window.variantLabel = variantLabel;
-  if (typeof getSizeRowsFromVariants !== "undefined") window.getSizeRowsFromVariants = getSizeRowsFromVariants;
-  if (typeof sizeRowsToVariants !== "undefined") window.sizeRowsToVariants = sizeRowsToVariants;
-  if (typeof safeParse !== "undefined") window.safeParse = safeParse;
-  if (typeof formatDate !== "undefined") window.formatDate = formatDate;
-  if (typeof timeAgo !== "undefined") window.timeAgo = timeAgo;
-  if (typeof getLang !== "undefined") window.getLang = getLang;
-  if (typeof setLang !== "undefined") window.setLang = setLang;
-  if (typeof useT !== "undefined") window.useT = useT;
-  if (typeof fmt !== "undefined") window.fmt = fmt;
-  if (typeof getTheme !== "undefined") { window.getTheme = getTheme; window.__dmGetTheme = getTheme; }
-  if (typeof setTheme !== "undefined") { window.setTheme = setTheme; window.__dmSetTheme = setTheme; }
-  if (typeof viewToHash !== "undefined") window.viewToHash = viewToHash;
-  if (typeof hashToView !== "undefined") window.hashToView = hashToView;
-  if (typeof ToastProvider !== "undefined") window.ToastProvider = ToastProvider;
-  if (typeof useToast !== "undefined") window.useToast = useToast;
-  if (typeof DessieShop !== "undefined") window.DessieShop = DessieShop;
-  if (typeof buyNow !== "undefined") window.buyNow = buyNow;
-  if (typeof nextStep !== "undefined") window.nextStep = nextStep;
-  if (typeof prevStep !== "undefined") window.prevStep = prevStep;
-  if (typeof submitOrder !== "undefined") window.submitOrder = submitOrder;
-  if (typeof search !== "undefined") window.search = search;
-  if (typeof findConversation !== "undefined") window.findConversation = findConversation;
-  if (typeof submit !== "undefined") window.submit = submit;
-  if (typeof lt !== "undefined") window.lt = lt;
-  if (typeof lm !== "undefined") window.lm = lm;
-  if (typeof send !== "undefined") window.send = send;
-  if (typeof tryLogin !== "undefined") window.tryLogin = tryLogin;
-  if (typeof doDeliver !== "undefined") window.doDeliver = doDeliver;
-  if (typeof doPickup !== "undefined") window.doPickup = doPickup;
-  if (typeof updateStatus !== "undefined") window.updateStatus = updateStatus;
-  if (typeof assignDriver !== "undefined") window.assignDriver = assignDriver;
-  if (typeof verifyPayment !== "undefined") window.verifyPayment = verifyPayment;
-  if (typeof rejectPayment !== "undefined") window.rejectPayment = rejectPayment;
-  if (typeof toggleSelect !== "undefined") window.toggleSelect = toggleSelect;
-  if (typeof selectAll !== "undefined") window.selectAll = selectAll;
-  if (typeof clearSelection !== "undefined") window.clearSelection = clearSelection;
-  if (typeof applyBulkAssign !== "undefined") window.applyBulkAssign = applyBulkAssign;
-  if (typeof startEdit !== "undefined") window.startEdit = startEdit;
-  if (typeof startAdd !== "undefined") window.startAdd = startAdd;
-  if (typeof cancel !== "undefined") window.cancel = cancel;
-  if (typeof handleImageUpload !== "undefined") window.handleImageUpload = handleImageUpload;
-  if (typeof searchSuggestions !== "undefined") window.searchSuggestions = searchSuggestions;
-  if (typeof adoptSuggestion !== "undefined") window.adoptSuggestion = adoptSuggestion;
-  if (typeof save !== "undefined") window.save = save;
-  if (typeof del !== "undefined") window.del = del;
-  if (typeof updatePaymentMethod !== "undefined") window.updatePaymentMethod = updatePaymentMethod;
-  if (typeof savePaymentMethods !== "undefined") window.savePaymentMethods = savePaymentMethods;
-  if (typeof saveSettings !== "undefined") window.saveSettings = saveSettings;
-  if (typeof savePickup !== "undefined") window.savePickup = savePickup;
-  if (typeof startEditPickup !== "undefined") window.startEditPickup = startEditPickup;
-  if (typeof deletePickup !== "undefined") window.deletePickup = deletePickup;
-  if (typeof emptyForm !== "undefined") window.emptyForm = emptyForm;
-  if (typeof add !== "undefined") window.add = add;
-  if (typeof toggleStatus !== "undefined") window.toggleStatus = toggleStatus;
-  if (typeof Icon !== "undefined") window.Icon = Icon;
-  if (typeof API_URL !== "undefined") window.API_URL = API_URL;
-  if (typeof TRANSLATIONS !== "undefined") window.TRANSLATIONS = TRANSLATIONS;
+  window.getTheme = getTheme;
+  window.setTheme = setTheme;
+  window.__dmGetTheme = getTheme;
+  window.__dmSetTheme = setTheme;
+  window.DEFAULT_MEDIUM_SURCHARGE = DEFAULT_MEDIUM_SURCHARGE;
+  window.DEFAULT_HEAVY_SURCHARGE = DEFAULT_HEAVY_SURCHARGE;
+  window.DEFAULT_DELIVERY_ZONES = DEFAULT_DELIVERY_ZONES;
+  window.DEFAULT_PAYMENT_METHODS = DEFAULT_PAYMENT_METHODS;
   if (typeof ORDER_STATUSES !== "undefined") window.ORDER_STATUSES = ORDER_STATUSES;
   if (typeof PAYMENT_STATUSES !== "undefined") window.PAYMENT_STATUSES = PAYMENT_STATUSES;
-  if (typeof DEFAULT_DELIVERY_ZONES !== "undefined") window.DEFAULT_DELIVERY_ZONES = DEFAULT_DELIVERY_ZONES;
-  if (typeof DEFAULT_PAYMENT_METHODS !== "undefined") window.DEFAULT_PAYMENT_METHODS = DEFAULT_PAYMENT_METHODS;
-  if (typeof DEFAULT_HEAVY_SURCHARGE !== "undefined") window.DEFAULT_HEAVY_SURCHARGE = DEFAULT_HEAVY_SURCHARGE;
-  if (typeof DEFAULT_MEDIUM_SURCHARGE !== "undefined") window.DEFAULT_MEDIUM_SURCHARGE = DEFAULT_MEDIUM_SURCHARGE;
-  if (typeof AdminView !== "undefined") window.AdminView = AdminView;
-  if (typeof BackBar !== "undefined") window.BackBar = BackBar;
-  if (typeof StatusBadge !== "undefined") window.StatusBadge = StatusBadge;
-  if (typeof OrderList !== "undefined") window.OrderList = OrderList;
-  if (typeof OwnerOrders !== "undefined") window.OwnerOrders = OwnerOrders;
-  if (typeof OwnerProducts !== "undefined") window.OwnerProducts = OwnerProducts;
-  if (typeof OwnerCategories !== "undefined") window.OwnerCategories = OwnerCategories;
-  if (typeof OwnerTickets !== "undefined") window.OwnerTickets = OwnerTickets;
-  if (typeof OwnerAnalytics !== "undefined") window.OwnerAnalytics = OwnerAnalytics;
-  if (typeof OwnerSettings !== "undefined") window.OwnerSettings = OwnerSettings;
-  if (typeof OwnerAdmins !== "undefined") window.OwnerAdmins = OwnerAdmins;
-  if (typeof OwnerZones !== "undefined") window.OwnerZones = OwnerZones;
-  if (typeof SellerDashboard !== "undefined") window.SellerDashboard = SellerDashboard;
-  if (typeof DeliveryDashboard !== "undefined") window.DeliveryDashboard = DeliveryDashboard;
-  if (typeof DeliveryOrderCard !== "undefined") window.DeliveryOrderCard = DeliveryOrderCard;
-  if (typeof DeliveryOrderList !== "undefined") window.DeliveryOrderList = DeliveryOrderList;
-} catch (e) { console.warn("shared window export", e); }
-
-try { window.getTheme = getTheme; window.setTheme = setTheme; window.__dmGetTheme = getTheme; window.__dmSetTheme = setTheme; } catch(e) {}
+  if (typeof TRANSLATIONS !== "undefined") window.TRANSLATIONS = TRANSLATIONS;
+  if (typeof API_URL !== "undefined") window.API_URL = API_URL;
+  if (typeof getSizeRowsFromVariants !== "undefined") window.getSizeRowsFromVariants = getSizeRowsFromVariants;
+  if (typeof sizeRowsToVariants !== "undefined") window.sizeRowsToVariants = sizeRowsToVariants;
+} catch (e) { console.warn("shared exports", e); }
